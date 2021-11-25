@@ -84,6 +84,7 @@ def new():
 
         if request.form.get('btn_index') == 'Cancel':
             print('Cancel button')
+            return render_template('index.html')
             return redirect('/index', code=302, Response=None)  # не работает
             pass  # do something
         elif request.form.get('btn_submit') == 'New game':

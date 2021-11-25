@@ -3,7 +3,7 @@
 
 {% block content %}
 <div class="container">
-    <p>Параметры для создания игры:</p>
+    <h4>Параметры для создания игры:</h4>
     <div>
     <form action="" method="post" class="form" role="form">
         {{ form.hidden_tag() }}
@@ -12,6 +12,7 @@
            {{form.name(class="form-control")}}
            <small id="nameHelp" class="form-text text-muted">от 3 до 30 символов.</small>
         </div>
+        <hr/>
         <div class="form-row row col-sm-9">
             <div class="col-sm-3">
                 {{form.height.label(class="form-label")}}
@@ -32,17 +33,25 @@
            {{form.exit_count(class="form-control")}}
             </div>
         </div>
+        <hr/>
         <div class="form-check col-sm-6">
            {{form.ninja.label(class="form-check-label")}}
            {{form.ninja(class="form-check-input")}}
         </div>
-        <div class="form-group col-sm-6">
-            {{ form.btn_submit() }}
+        <hr/>
+        <div class="form-row row col-sm-9 justify-content-center">
+            <div class="form-group col-sm-3">
+                {{ form.btn_submit() }}
+            </div>
+            <div class="form-group col-sm-3">
+                <input type="button" class="btn btn-primary" value="Главная" onClick='location.href="/"'>
+            </div>
+            <div class="form-group col-sm-3">
+                <input type="button" class="btn btn-primary btn-block" value="Вернуться к игре"
+                       onClick='location.href="/"' disabled>
+            </div>
         </div>
-        <div class="form-group col-sm-6">
-            {{ form.btn_index() }}
-        </div>
-        <p><input type=submit class='btn btn-warning btn-block'></p>
+        <hr/>
 
 <!--{% for field, errors in form.errors.items() %}-->
 <!--    <small class="form-text text-muted ">-->

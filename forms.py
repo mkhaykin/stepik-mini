@@ -20,3 +20,4 @@ class NewGameForm(FlaskForm):
 
     btn_submit = SubmitField('Новая игра', render_kw={'class': 'btn btn-primary'})
     btn_index = SubmitField(label='На главную')  # , render_kw={"onclick": 'location.href=\"/index.html\"'}
+    btn_game = SubmitField(label='Вернуться в игру', render_kw={'class': 'btn btn-primary', 'disable': ''})  # , render_kw={"onclick": 'location.href=\"/index.html\"'}
