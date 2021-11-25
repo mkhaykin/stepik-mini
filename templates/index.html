@@ -1,0 +1,22 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="container">
+    <div class="row border bg-white shadow-sm justify-content-center align-items-center">
+        <div class="col text-center ">
+                <p>Привет, это игра ... бла бла asd asd asd asd asd asd as das da sd</p>
+        </div>
+    </div>
+    <div class="row">
+        <form action="" method="post" novalidate>
+            <div class="form-row row border justify-content-center">
+                <div class="col-sm-2">
+                    <input type="button" class="btn btn-primary" value="Новая игра" onClick='location.href="/new"'>
+                </div>
+                <div class="col-sm-2">
+                    <input type="button" class="btn btn-primary" value="Продолжить начатую" onClick='location.href="/game"' disabled>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock content %}

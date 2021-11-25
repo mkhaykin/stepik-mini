@@ -1,0 +1,56 @@
+{% extends "layout.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block content %}
+<div class="container">
+    <p>Параметры для создания игры:</p>
+    <div>
+    <form action="" method="post" class="form" role="form">
+        {{ form.hidden_tag() }}
+        <div class="form-group col-sm-3">
+           {{form.name.label(class="form-label")}}
+           {{form.name(class="form-control")}}
+           <small id="nameHelp" class="form-text text-muted">от 3 до 30 символов.</small>
+        </div>
+        <div class="form-row row col-sm-9">
+            <div class="col-sm-3">
+                {{form.height.label(class="form-label")}}
+                {{form.height(class="form-control")}}
+                <small id="heightHelp" class="form-text text-muted">10 - 30</small>
+            </div>
+            <div class="col-sm-3">
+                {{form.width.label(class="form-label")}}
+                {{form.width(class="form-control")}}
+                <small id="widthHelp" class="form-text text-muted">10 - 30</small>
+            </div>
+            <div class="col-sm-3">
+                {{form.difficult.label(class="form-label")}}
+                {{form.difficult(class="form-select")}}
+            </div>
+            <div class="col-sm-3">
+           {{form.exit_count.label(class="form-label")}}
+           {{form.exit_count(class="form-control")}}
+            </div>
+        </div>
+        <div class="form-check col-sm-6">
+           {{form.ninja.label(class="form-check-label")}}
+           {{form.ninja(class="form-check-input")}}
+        </div>
+        <div class="form-group col-sm-6">
+            {{ form.btn_submit() }}
+        </div>
+        <div class="form-group col-sm-6">
+            {{ form.btn_index() }}
+        </div>
+        <p><input type=submit class='btn btn-warning btn-block'></p>
+
+<!--{% for field, errors in form.errors.items() %}-->
+<!--    <small class="form-text text-muted ">-->
+<!--        {{ ', '.join(errors) }}-->
+<!--    </small>-->
+<!--{% endfor %}-->
+
+    </form>
+        </div>
+</div>
+{% endblock content %}

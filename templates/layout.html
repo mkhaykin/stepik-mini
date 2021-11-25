@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" lang="en">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Мини-проект</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-F3w7mX95PdgyTmZZMECAngseQB83DfGTowi0iMjiWaeVhAn4FJkqJByhZMI3AhiU" crossorigin="anonymous">
+
+    <!-- <link rel="stylesheet" type="text/css" href="/static/style.css"> -->
+</head>
+<body class="bg-light">
+	<header>
+		{% block header %}
+		<div class="row border justify-content-center align-items-center">
+			<div class="col-md-auto">
+				<h3>Hi, it's my mini-project )</h3>
+			</div>
+		</div>
+		{% endblock %}
+	</header>
+	<div id="wrapper">
+		{% block content %}
+		{% endblock %}
+	</div>
+	<footer>
+		{% block footer %}
+		<div class="row border justify-content-center align-items-center">
+			<div class="col-md-auto">
+				<h6>Copyleft etc ...</h6>
+			</div>
+		</div>
+		{% endblock %}
+	</footer>
+	<script>
+    	{% block scripts %}
+    	{% endblock %}
+    </script>
+
+	<!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+
+	<script type="text/javascript" src="/static/script.js"></script>
+</body>
+</html>
