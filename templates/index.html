@@ -1,22 +1,23 @@
 {% extends "layout.html" %}
 {% block content %}
 <div class="container">
-    <div class="row border bg-white shadow-sm justify-content-center align-items-center">
-        <div class="col text-center ">
+    <div class="row mt-5 ">
+        <div class="col-1"></div>
+        <div class="col text-center border bg-white shadow-sm ">  # justify-content-center align-items-center
                 <p>Привет, это игра ... бла бла asd asd asd asd asd asd as das da sd</p>
         </div>
+        <div class="col-1"></div>
     </div>
-    <div class="row">
-        <form action="" method="post" novalidate>
-            <div class="form-row row border justify-content-center">
-                <div class="col-sm-2">
-                    <input type="button" class="btn btn-primary" value="Новая игра" onClick='location.href="/new"'>
-                </div>
-                <div class="col-sm-2">
-                    <input type="button" class="btn btn-primary" value="Продолжить начатую" onClick='location.href="/game"' disabled>
-                </div>
-            </div>
-        </form>
+    <form action="" method="post" novalidate>
+    <div class="form-row row justify-content-center mt-5">
+        <div class="col-sm-2">
+            <input id="btn_new" type="button" class="btn btn-primary" value="Новая игра" onClick='location.href="/new"'>
+        </div>
+        <div class="col-sm-2">
+            <input id="btn_continue" type="button" class="btn btn-primary" value="Продолжить начатую"
+                   onClick='location.href="/game"' disabled>
+        </div>
     </div>
+    </form>
 </div>
 {% endblock content %}

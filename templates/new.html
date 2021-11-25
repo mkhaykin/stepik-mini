@@ -7,46 +7,46 @@
     <div>
     <form action="" method="post" class="form" role="form">
         {{ form.hidden_tag() }}
-        <div class="form-group col-sm-3">
+        <div class="form-group col-3">
            {{form.name.label(class="form-label")}}
            {{form.name(class="form-control")}}
            <small id="nameHelp" class="form-text text-muted">от 3 до 30 символов.</small>
         </div>
         <hr/>
-        <div class="form-row row col-sm-9">
-            <div class="col-sm-3">
+        <div class="form-row row col-12">
+            <div class="col-3">
                 {{form.height.label(class="form-label")}}
                 {{form.height(class="form-control")}}
                 <small id="heightHelp" class="form-text text-muted">10 - 30</small>
             </div>
-            <div class="col-sm-3">
+            <div class="col-3">
                 {{form.width.label(class="form-label")}}
                 {{form.width(class="form-control")}}
                 <small id="widthHelp" class="form-text text-muted">10 - 30</small>
             </div>
-            <div class="col-sm-3">
+            <div class="col-3">
                 {{form.difficult.label(class="form-label")}}
                 {{form.difficult(class="form-select")}}
             </div>
-            <div class="col-sm-3">
+            <div class="col-3">
            {{form.exit_count.label(class="form-label")}}
            {{form.exit_count(class="form-control")}}
             </div>
         </div>
         <hr/>
-        <div class="form-check col-sm-6">
+        <div class="form-check col-6">
            {{form.ninja.label(class="form-check-label")}}
            {{form.ninja(class="form-check-input")}}
         </div>
         <hr/>
-        <div class="form-row row col-sm-9 justify-content-center">
-            <div class="form-group col-sm-3">
+        <div class="form-row row justify-content-center">
+            <div class="form-group col-3">
                 {{ form.btn_submit() }}
             </div>
-            <div class="form-group col-sm-3">
-                <input type="button" class="btn btn-primary" value="Главная" onClick='location.href="/"'>
+            <div class="form-group col-3">
+                <input type="button" class="btn btn-primary" value="Вернуться на главную" onClick='location.href="/"'>
             </div>
-            <div class="form-group col-sm-3">
+            <div class="form-group col-3">
                 <input type="button" class="btn btn-primary btn-block" value="Вернуться к игре"
                        onClick='location.href="/"' disabled>
             </div>

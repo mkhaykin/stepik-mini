@@ -94,34 +94,14 @@ def new():
             pass  # unknown
 
         if form.validate_on_submit():  # request.method == 'POST' and
+            # заполняем параметрами мира поля ввода.
+            # делаем предупреждение, что мир существует и мы его перезатрем.
+            # делаем другие названия кнопок
             name = form.name.data
-            # email = form.email.data
-            # message = form.message.data
             print(name)
+            return redirect('/game', code=302, Response=None)  # не работает
 
         resp = render_template('new.html', form=form)
-
-    # todo вот это убрать наверное. ...
-    # try:
-    #     world = the_game.get_world(user_id=user_id)
-    # except NoSuchUserException as e:
-    #     print('NoSuchUserException')  # todo drop
-    #     resp = redirect('/index', code=302, Response=None)
-    # except NoWorldException as e:
-    #     print('NoWorldException')  # todo drop
-    #     # TODO а надо??? какая-то чушь
-    #     resp = make_response(render_template('new.html'))
-    # except Exception as e:
-    #     # перенаправление на страницу с ошибкой
-    #     # используем render_template для сокрытия адреса
-    #     resp = render_template('error.html', exception=e)
-    # else:
-    #     # TODO
-    #     # заполняем параметрами мира поля ввода.
-    #     # делаем предупреждение, что мир существует и мы его перезатрем.
-    #     # делаем другие названия кнопок
-    #     resp = redirect('/game', code=302, Response=None)
-    #     # resp = make_response(render_template('game.html', world=world))
 
     return resp
 
@@ -136,6 +116,7 @@ def game():
     # TODO drop
     print('-------')
     print(f'//game: method {request.method} args {request.args}')
+    return render_template('game.html', world='qwe')
 
     user_id = request.cookies.get('userID')
     try:
@@ -149,7 +130,7 @@ def game():
         # используем render_template для сокрытия адреса
         resp = render_template('error.html', exception=e)
     else:
-        resp = make_response(render_template('game.html', world=world))
+        resp = render_template('game.html', world=world)
     return resp
 
 
