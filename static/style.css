@@ -1,5 +1,12 @@
 #id_game_table{
     width: initial;
+    table-layout: fixed;
+}
+
+#id_game_table tbody, td, tfoot, th, thead, tr{
+    border-color: initial;
+    border-style: initial;
+    border-width: 0;
 }
 
 #id_game_table tr {
@@ -11,21 +18,10 @@
     padding: 0px;
 }
 
-#id_game_table.cell {
+#id_game_table .cell {
+    background: white;
 }
 
-#id_game_table .wall-cell {
-    background: whitesmoke;
-}
-
-#id_game_table .green-cell {
-    background: LimeGreen;
-}
-
-.new-cell {
-    background: PaleGreen;
-}
-
-.dead-cell {
+#id_game_table .cell-wall {
     background: Silver;
 }
