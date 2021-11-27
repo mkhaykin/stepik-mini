@@ -4,3 +4,5 @@ from os import urandom, environ
 PORT = int(environ.get("PORT", 5000))
 
 SECRET_KEY = urandom(32)
+
+COOKIE = 'sessionID'

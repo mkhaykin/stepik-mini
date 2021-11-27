@@ -1,7 +1,7 @@
 from typing import Optional
 from flask_bootstrap import Bootstrap
 
-import config
+from config import SECRET_KEY, PORT, COOKIE
 from forms import NewGameForm
 from game import *
 
@@ -19,7 +19,7 @@ from wtforms.validators import DataRequired
 # app = Flask(__name__)
 app = Flask(__name__)
 bootstrap = Bootstrap(app)  # test
-app.config['SECRET_KEY'] = config.SECRET_KEY
+app.config['SECRET_KEY'] = SECRET_KEY
 
 
 the_game = Game()
@@ -38,16 +38,16 @@ def index():
     print('-------')
     print(f'//index: method {request.method} args {request.args}')
 
-    user_id = request.cookies.get('userID')
+    session_id = request.cookies.get(COOKIE)
     try:
         # todo что-то криво ...
-        user = the_game.get_user(user_id=user_id)
-    except NoSuchUserException as e:
-        print('NoSuchUserException')  # todo drop
+        _ = the_game.get_session(session_id=session_id)
+    except NoSuchSessionException as e:
+        print(e.__class__.__name__)  # todo drop
         # generate new user id and set cookies
-        user_id = the_game.new_user()
+        session_id = the_game.new_session()
         resp = make_response(render_template('index.html'))
-        resp.set_cookie('userID', user_id)
+        resp.set_cookie(COOKIE, session_id)
     except Exception as e:
         # перенаправление на страницу с ошибкой
         # используем render_template для сокрытия адреса
@@ -70,10 +70,12 @@ def new():
     print('-------')
     print(f'//new: method {request.method} args {request.args}')
 
-    user_id = request.cookies.get('userID')
+    session_id = request.cookies.get(COOKIE)
     try:
-        user = the_game.get_user(user_id=user_id)
-    except NoSuchUserException as e:
+        _ = the_game.get_session(session_id=session_id)
+        # если есть сессия, присваиваем старые значение полям.
+        # TODO
+    except NoSuchSessionException as e:
         return redirect('/index', code=302, Response=None)
     except Exception as e:
         # перенаправление на страницу с ошибкой
@@ -81,6 +83,13 @@ def new():
         return render_template('error.html', exception=e)
     else:
         form = NewGameForm()
+        # TODO drop
+        form.name.data = 'test'
+        form.height.data = 20
+        form.width.data = 20
+        # form.difficult.data
+        form.exit_count.data = 5
+        form.ninja.data = True
 
         if request.form.get('btn_index') == 'Cancel':
             print('Cancel button')
@@ -89,7 +98,6 @@ def new():
             pass  # do something
         elif request.form.get('btn_submit') == 'New game':
             print('Submit button')
-            pass  # do something else
         else:
             pass  # unknown
 
@@ -97,8 +105,19 @@ def new():
             # заполняем параметрами мира поля ввода.
             # делаем предупреждение, что мир существует и мы его перезатрем.
             # делаем другие названия кнопок
-            name = form.name.data
-            print(name)
+            try:
+                the_game.new_game(session_id, **form.data)
+            except NoSuchSessionException as e:
+                return redirect('/index', code=302, Response=None)
+            except Exception as e:
+                # перенаправление на страницу с ошибкой
+                # используем render_template для сокрытия адреса
+                return render_template('error.html', exception=e)
+            else:
+                return redirect('/game', code=302, Response=None)
+
+            # for item in form.data:
+            #     print(item)
             return redirect('/game', code=302, Response=None)  # не работает
 
         resp = render_template('new.html', form=form)
@@ -118,10 +137,10 @@ def game():
     print(f'//game: method {request.method} args {request.args}')
     return render_template('game.html', world='qwe')
 
-    user_id = request.cookies.get('userID')
+    session_id = request.cookies.get(COOKIE)
     try:
-        world = the_game.get_world(user_id)
-    except NoSuchUserException as e:
+        world = the_game.get_world(session_id)
+    except NoSuchSessionException as e:
         resp = redirect('/index', code=302, Response=None)
     except NoWorldException as e:
         resp = redirect('/new', code=302, Response=None)
@@ -154,5 +173,5 @@ def status():
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=config.PORT, debug=True)
+    app.run(host='0.0.0.0', port=PORT, debug=True)
     # app.run(host='0.0.0.0', port=port, debug=False)

@@ -6,10 +6,11 @@
 {% endblock %}
 
 {% block content %}
-<div class="container border">
-    <div class="row border justify-content-center align-items-center">
-        <div class="col-2">
-<!--            <form action="">-->
+<div class="container">
+    <div class="row row-eq-height">
+        <div class="col grow-fill border"></div>
+        <div class="col-2 d-flex flex-column border">
+            <div class="row flex-fill mt-3 align-items-center justify-items-center">
                 <table class="table table-borderless text-center" >
 <!--                    style="line-height: 2.5"-->
                     <thead>
@@ -45,28 +46,25 @@
                         <td></td>
                     </tr>
                 </table>
-<!--            </form>-->
+            </div>
+            <div class="text-center">
+                <input id="btn_index" type="button" class="btn btn-primary" value="На главную"
+                       onClick='location.href="/index"'>
+            </div>
+            <div class="text-center mt-3 mb-3">
+                    <input id="btn_new" type="button" class="btn btn-primary" value="Новая игра"
+                           onClick='location.href="/new"'>
+            </div>
         </div>
-        <div class="col">
-                    <table id="id_game_table" class="table content-table">
-                        <thead>
-<!--                        <tr>-->
-<!--<th class="tdicon" width="30"></th>-->
-<!--<th class="tdicon" width="30"></th>-->
-<!--<th class="tdicon" width="30"></th>-->
-<!--<th class="tdicon" width="30"></th>-->
-<!--<th class="tdicon" width="30"></th>-->
-<!--                        </tr>-->
-                        </thead>
-                        <tbody>
-
-                        </tbody>
-                        <!--                        class="table table-bordered" style='width: "100px"'-->
-                    </table>
+        <div class="col-auto border">
+            <table id="id_game_table" class="table content-table">
+                <thead></thead>
+                <tbody></tbody>
+            </table>
         </div>
+        <div class="col grow-fill border"></div>
     </div>
 </div>
-
 {% endblock content %}
 
 {% block scripts %}
