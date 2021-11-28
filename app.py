@@ -124,6 +124,8 @@ def new():
 
     return resp
 
+# TODO логирование (тут и в heroku)
+# https://logtail.com/tutorials/how-to-start-logging-with-heroku/
 
 @app.route('/game', methods=['GET', 'POST'])
 @app.route('/game.html', methods=['GET', 'POST'])

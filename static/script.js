@@ -1,7 +1,7 @@
 
 
 function init() {
-    TableDrawBlank(20, 20);                  // draw table
+    TableDrawBlank(30, 30);                  // draw table
 }
 
 function TableDrop() {

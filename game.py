@@ -1,4 +1,8 @@
 import time
+
+import requests
+
+
 from uuid import uuid4
 
 
@@ -44,16 +48,11 @@ class Session:
 
     def start_game(self, **kwargs):
         self._parse_params(**kwargs)
-        self._field = [['X', 'X', 'X', 'X', 'X', 'X', 'X', 'X'],
-         ['X', ' ', ' ', 'X', 'X', 'X', ' ', 'X'],
-         ['X', ' ', ' ', 'X', 'X', 'X', ' ', 'X'],
-         ['X', 'X', 'X', 'X', 'X', 'X', 'X', 'X'],
-         ['X', 'X', 'X', 'X', ' ', ' ', 'X', 'X'],
-         ['X', 'X', 'X', ' ', 'X', ' ', 'X', 'X'],
-         ['X', ' ', ' ', ' ', ' ', ' ', 'X', 'X'],
-         ['X', 'X', 'X', 'X', 'X', 'X', 'X', 'X'],
-         ['X', 'X', 'X', 'X', 'X', 'X', 'X', 'X']]
+        params = '&'.join([f'{param}={kwargs[param]}' for param in ('height', 'width', 'difficult', 'exit_count')])
 
+        data = requests.get("http://labyrinths.herokuapp.com/get?" + params).json()
+        self._field = data['labyrinth']
+        print(self._field)
 
     def _parse_params(self, **kwargs):
         self._user_name = kwargs['name']
@@ -62,6 +61,8 @@ class Session:
         self._field_difficult = kwargs['difficult']
         self._field_exit_count = kwargs['exit_count']
         self._ninja = kwargs['ninja']
+
+        # TODO drop
         print('я распарсил )))')
 
 
