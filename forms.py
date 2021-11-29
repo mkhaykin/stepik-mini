@@ -13,11 +13,11 @@ class NewGameForm(FlaskForm):
     height = IntegerField('Высота', validators=[DataRequired(), valid_size])
     width = IntegerField('Ширина', validators=[DataRequired(), valid_size])
 
-    difficult = SelectField('Сложность', choices=[(0, 'easy'), (1, 'normal'), (3, 'high')], coerce=int)
+    difficult = SelectField('Сложность', choices=[(30, 'easy'), (40, 'normal'), (60, 'high')], coerce=int)
     valid_count = NumberRange(min=1, max=10, message="количество выходов от 1 до 10!")
     exit_count = IntegerField('Кол-во выходов', validators=[DataRequired(), valid_count])
     ninja = BooleanField('Ниндзя на поле')
 
-    btn_submit = SubmitField('Новая игра', render_kw={'class': 'btn btn-primary'})
-    btn_index = SubmitField(label='На главную')  # , render_kw={"onclick": 'location.href=\"/index.html\"'}
-    btn_game = SubmitField(label='Вернуться в игру', render_kw={'class': 'btn btn-primary', 'disable': ''})  # , render_kw={"onclick": 'location.href=\"/index.html\"'}
+    btn_submit = SubmitField('Начать игру', render_kw={'class': 'btn btn-primary'})
+    # btn_index = SubmitField(label='На главную')  # , render_kw={"onclick": 'location.href=\"/index.html\"'}
+    # btn_game = SubmitField(label='Вернуться в игру', render_kw={'class': 'btn btn-primary', 'disable': ''})  # , render_kw={"onclick": 'location.href=\"/index.html\"'}

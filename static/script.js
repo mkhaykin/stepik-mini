@@ -1,8 +1,31 @@
-
+var flgWaitForState = false
 
 function init() {
-    TableDrawBlank(30, 30);                  // draw table
+    render_field()
 }
+
+function get_json(url, json=null, callback=null, callback_onerror=null) {
+    // url              - url for request
+    // callback         - function on load
+    // json             - json to post on url
+    // callback_onerror - function on error
+    var xhr = new XMLHttpRequest();
+    xhr.open(json !== null ? 'POST' : 'GET', url, true);
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.responseType = 'json';
+    if (callback) {
+        xhr.onload = function () {
+            callback(xhr.status, xhr.response);
+        }
+    }
+    if (callback_onerror) {
+        xhr.onerror = function() {
+            callback_onerror(xhr.status);
+        }
+    }
+    xhr.send(JSON.stringify(json));
+}
+
 
 function TableDrop() {
     let table = document.getElementById('id_game_table');
@@ -16,7 +39,13 @@ function TableDrop() {
     table.createTBody();
 }
 
-function TableDrawBlank(col, row){
+function TableDraw(col, row, labyrinth, hero, ninja){
+//    'height': высота
+//    'width': ширина
+//    'labyrinth': лабиринт
+//    'hero': позиция героя
+//    'ninja': позиция ниндзя
+
     TableDrop();
 
     let table_head = document.getElementById('id_game_table').getElementsByTagName('thead')[0];
@@ -33,12 +62,22 @@ function TableDrawBlank(col, row){
         tr = table_body.insertRow(i);
         for (let j = 0; j < col; j++) {
             td = tr.insertCell();
-            td.id = 'td_' + i + '_' + j
-            td.classList = 'cell';
-            if (i === 6) {
+//            td.id = 'td_' + i + '_' + j
+            if (labyrinth[i][j] === 'X') {
                 td.classList = 'cell-wall';
+            } else {
+                td.classList = 'cell';
             }
-            if (i === 1 && j === 1) {
+
+            if (i === hero[0] && j === hero[1]) {
+                img = document.createElement("img");
+                img.src = "static/favicon.ico";
+                img.style.height = '30px';
+                img.style.width = '30px';
+                td.appendChild(img);
+            }
+
+            if (i === ninja[0] && j === ninja[1]) {
                 img = document.createElement("img");
                 img.src = "static/favicon.ico";
                 img.style.height = '30px';
@@ -50,24 +89,43 @@ function TableDrawBlank(col, row){
     }
 }
 
+function render_field() {
+    if (!flgWaitForState) {
+        flgWaitForState = true;
+        get_json('/state', null, render_field_onload, render_field_onerror);
+    }
+}
 
-//function TableDrawBlank(col, row) {
-//    let table = document.getElementById('game_table');
-//
-//    // удаляем таблицу
-//    // TableDrop();
-//    // TODO сделать нормальную генерацию, а не вставлять в позицию 0.
-//    // генерируем заново
-//    for (var i = row - 1; i >= 0; i--) {
-//        let x = table.insertRow(0);
-//        for (var j=0; j < col; j++) {
-//            table.rows[0].insertCell(j);
-//            table.rows[0].cells[j].id = 'td' + i + '_' + j
-//            table.rows[0].cells[j].classList = 'cell living-cell';
-//            // table.rows[0].cells[j].style.cssText = 'width: 1%';
-//        }
-//    }
-//    alert("I am an alert box!");
-//}
+function render_field_onload(status, json) {
+    const data = JSON.parse(json);
+//    tableHeight = data.height;
+//    tableWidth = data.width;
+//    TableDrawBlank(data.width, data.height);
+
+//    'height': высота
+//    'width': ширина
+//    'labyrinth': лабиринт
+//    'hero': позиция героя
+//    'ninja': позиция ниндзи
+
+// TODO добавить номер шага ((( data.step
+    TableDraw(data.width, data.height, data.labyrinth, data.hero, data.ninja);
+    setStatusOK();
+    flgWaitForStatus = false;
+}
+
+function render_field_onerror(status) {
+    TableDrop();
+    setStatusError();
+    flgWaitForStatus = false;
+}
+
+function setStatusOK() {
+    // TODO
+}
+
+function setStatusError() {
+    // TODO
+}
 
 init()

@@ -1,3 +1,4 @@
+import json
 from typing import Optional
 from flask_bootstrap import Bootstrap
 
@@ -13,6 +14,7 @@ from flask import url_for
 from flask import render_template
 from flask import make_response
 from flask import request
+from flask import jsonify
 from wtforms import StringField, PasswordField, BooleanField, SubmitField
 from wtforms.validators import DataRequired
 
@@ -70,11 +72,19 @@ def new():
     print('-------')
     print(f'//new: method {request.method} args {request.args}')
 
+    form = NewGameForm()
+
     session_id = request.cookies.get(COOKIE)
     try:
         _ = the_game.get_session(session_id=session_id)
         # если есть сессия, присваиваем старые значение полям.
-        # TODO
+        # TODO drop
+        # form.name.data = 'test'
+        # form.height.data = 20
+        # form.width.data = 20
+        # # form.difficult.data
+        # form.exit_count.data = 5
+        # form.ninja.data = True
     except NoSuchSessionException as e:
         return redirect('/index', code=302, Response=None)
     except Exception as e:
@@ -82,15 +92,6 @@ def new():
         # используем render_template для сокрытия адреса
         return render_template('error.html', exception=e)
     else:
-        form = NewGameForm()
-        # TODO drop
-        form.name.data = 'test'
-        form.height.data = 20
-        form.width.data = 20
-        # form.difficult.data
-        form.exit_count.data = 5
-        form.ninja.data = True
-
         if request.form.get('btn_index') == 'Cancel':
             print('Cancel button')
             return render_template('index.html')
@@ -127,6 +128,7 @@ def new():
 # TODO логирование (тут и в heroku)
 # https://logtail.com/tutorials/how-to-start-logging-with-heroku/
 
+
 @app.route('/game', methods=['GET', 'POST'])
 @app.route('/game.html', methods=['GET', 'POST'])
 def game():
@@ -137,11 +139,11 @@ def game():
     # TODO drop
     print('-------')
     print(f'//game: method {request.method} args {request.args}')
-    return render_template('game.html', world='qwe')
+    # return render_template('game.html', world='qwe')
 
     session_id = request.cookies.get(COOKIE)
     try:
-        world = the_game.get_world(session_id)
+        _ = the_game.get_game(session_id)
     except NoSuchSessionException as e:
         resp = redirect('/index', code=302, Response=None)
     except NoWorldException as e:
@@ -151,14 +153,37 @@ def game():
         # используем render_template для сокрытия адреса
         resp = render_template('error.html', exception=e)
     else:
-        resp = render_template('game.html', world=world)
+        resp = render_template('game.html')
     return resp
+
+
+@app.route('/state', methods=['GET'])
+@app.route('/state.html', methods=['GET'])
+def get_state():
+    """ информация о состоянии объекта Game"""
+    session_id = request.cookies.get(COOKIE)
+    try:
+        data = the_game.get_game(session_id)
+    except NoSuchSessionException as e:
+        data['status'] = 'error'
+        data['message'] = 'no session'
+    except NoWorldException as e:
+        data['status'] = 'error'
+        data['message'] = 'no world'
+    except Exception as e:
+        data['status'] = 'error'
+        data['message'] = str(e)
+    else:
+        data['status'] = 'ok'
+        data['message'] = ''
+    json_data = json.dumps(data)
+    return jsonify(json_data), 200
 
 
 @app.route('/<string:action>:<string:direction>/', methods=['GET'])
 # @app.route('/<int:action><direction>/', methods=['GET'])
 def step(action, direction):
-    """ информация о состоянии объекта Game"""
+    """ вызов хода игры"""
     return f"action {action} direction {direction}"
 
 
