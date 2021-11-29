@@ -1,4 +1,5 @@
-var flgWaitForState = false
+var flgWaitForState = false;
+var flgWaitForMove = false;
 
 function init() {
     render_field()
@@ -89,6 +90,28 @@ function TableDraw(col, row, labyrinth, hero, ninja){
     }
 }
 
+function Move(direct){
+    if (!flgWaitForMove && !flgWaitForState) {
+        flgWaitForMove = true;
+        if (direct == 'sleep') {
+            url = '/action:'
+        } else {
+            url = '/move:'
+        }
+        url += direct
+        get_json(url, null, move_onload, move_onerror);
+    }
+}
+
+function move_onload(status, json) {
+    render_field()
+    flgWaitForMove = false;
+}
+
+function move_onerror(status, json) {
+    flgWaitForMove = false;
+}
+
 function render_field() {
     if (!flgWaitForState) {
         flgWaitForState = true;
@@ -97,11 +120,8 @@ function render_field() {
 }
 
 function render_field_onload(status, json) {
+    // TODO обработка в случае отсутствия данных
     const data = JSON.parse(json);
-//    tableHeight = data.height;
-//    tableWidth = data.width;
-//    TableDrawBlank(data.width, data.height);
-
 //    'height': высота
 //    'width': ширина
 //    'labyrinth': лабиринт
@@ -111,13 +131,13 @@ function render_field_onload(status, json) {
 // TODO добавить номер шага ((( data.step
     TableDraw(data.width, data.height, data.labyrinth, data.hero, data.ninja);
     setStatusOK();
-    flgWaitForStatus = false;
+    flgWaitForState = false;
 }
 
 function render_field_onerror(status) {
     TableDrop();
     setStatusError();
-    flgWaitForStatus = false;
+    flgWaitForState = false;
 }
 
 function setStatusOK() {

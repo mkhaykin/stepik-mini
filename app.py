@@ -122,10 +122,6 @@ def new():
                            game_run=(session_info['game_status'] == 'continue'))
 
 
-# TODO логирование (тут и в heroku)
-# https://logtail.com/tutorials/how-to-start-logging-with-heroku/
-
-
 @app.route('/game', methods=['GET', 'POST'])
 @app.route('/game.html', methods=['GET', 'POST'])
 def game():
@@ -181,7 +177,25 @@ def get_state():
 # @app.route('/<int:action><direction>/', methods=['GET'])
 def step(action, direction):
     """ вызов хода игры"""
-    return f"action {action} direction {direction}"
+
+    session_id = request.cookies.get(COOKIE)
+    data = dict()
+    try:
+        data = the_game.next_move(session_id, action, direction)
+    except NoSuchSessionException as e:
+        data['status'] = 'error'
+        data['message'] = 'no session'
+    except NoWorldException as e:
+        data['status'] = 'error'
+        data['message'] = 'no world'
+    except Exception as e:
+        data['status'] = 'error'
+        data['message'] = str(e)
+    else:
+        data['status'] = 'ok'
+        data['message'] = ''
+    json_data = json.dumps(data)
+    return jsonify(json_data), 200
 
 
 @app.route('/status', methods=['GET', 'POST'])
@@ -194,6 +208,10 @@ def status():
         s += f'{key}: \t {value}\n'
     # print(s)
     return "status \n" + s
+
+
+# TODO логирование (тут и в heroku)
+# https://logtail.com/tutorials/how-to-start-logging-with-heroku/
 
 
 if __name__ == '__main__':

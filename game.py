@@ -101,6 +101,18 @@ class Session:
         # TODO drop
         print('я распарсил )))')
 
+    def next_move(self, action, direction):
+        # ход игрока
+        # if (direct == 'sleep') {
+        #     url = '/action:' sleep
+        # } else {
+        #     url = '/move:' up, down, left, right
+        # }
+        self._pos_hero = (self._pos_hero[0] + 1, self._pos_hero[1] + 1)
+        # ход охотника
+        # TODO drop
+        print(f"action: {action}. direction: {direction}")
+        return {'action': 'success'}
 
 class Game:
     """ игра 'выход из лабиринта' """
@@ -133,6 +145,12 @@ class Game:
             raise ErrorWorldParamException from None
         except Exception as e:
             print(e)
+
+    def next_move(self, session_id, action, direction):
+        if session_id is None or session_id not in self._sessions:
+            raise NoSuchSessionException
+        session = self._sessions[session_id]
+        session.next_move(action, direction)
 
     def get_game(self, session_id):
         if session_id is None or session_id not in self._sessions:
