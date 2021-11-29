@@ -176,7 +176,8 @@ def get_state():
 @app.route('/<string:action>:<string:direction>/', methods=['GET'])
 # @app.route('/<int:action><direction>/', methods=['GET'])
 def step(action, direction):
-    """ вызов хода игры"""
+    """ вызов хода игры
+    примечание: вызов надуманный (можно в один параметр передавать), но такое требование к проекту"""
 
     session_id = request.cookies.get(COOKIE)
     data = dict()

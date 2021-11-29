@@ -70,7 +70,11 @@ function TableDraw(col, row, labyrinth, hero, ninja){
                 td.classList = 'cell';
             }
 
-            if (i === hero[0] && j === hero[1]) {
+            //   x ---
+            // y
+            // |
+            // |
+            if (i === hero[1] && j === hero[0]) {
                 img = document.createElement("img");
                 img.src = "static/favicon.ico";
                 img.style.height = '30px';
@@ -78,7 +82,7 @@ function TableDraw(col, row, labyrinth, hero, ninja){
                 td.appendChild(img);
             }
 
-            if (i === ninja[0] && j === ninja[1]) {
+            if (i === ninja[1] && j === ninja[0]) {
                 img = document.createElement("img");
                 img.src = "static/favicon.ico";
                 img.style.height = '30px';
