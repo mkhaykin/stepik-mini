@@ -127,6 +127,38 @@ class Session:
         # TODO drop
         print(self._field)
 
+    def next_move(self, action, direction):
+        # ход игрока
+        # if (direct == 'sleep') {
+        #     url = '/action:' sleep
+        # } else {
+        #     url = '/move:' up, down, left, right
+        # }
+
+        pos_hero = self._pos_hero  # ход охотника рассчитываем на старый ход ?
+
+        # NextStepWallException
+        # NextStepEndGameException
+        if action == 'move' and direction in ('up', 'down', 'left', 'right'):
+            diff = {'up': (0, -1), 'down': (0, 1), 'left': (-1, 0), 'right': (1, 0)}
+            pos_new = tuple(map(lambda a, b: a + b, self._pos_hero, diff[direction]))
+            if self._field[pos_new[1]][pos_new[0]] == self._char_blank:
+                self._pos_hero = pos_new
+                # если я на границе и нет рядом охотника, то выиграл!
+                # если охотник рядом, то проиграл
+            else:
+                raise NextStepWallException
+        elif action == 'action' and direction == 'sleep':
+            pass
+        else:
+            raise NextStepParamException
+
+        # self._pos_hero = (self._pos_hero[0] + 1, self._pos_hero[1] + 1)
+        # ход охотника
+        # TODO drop
+        print(f"action: {action}. direction: {direction}")
+        return {'action': 'success'}
+
     @staticmethod
     def _get_diffs(distance: int) -> set:
         """
@@ -212,6 +244,50 @@ class Session:
             check_list = self._get_near_points(position, distance)
         return -1, -1
 
+    def _path_calc(self, position: tuple = (1, 1)) -> list:
+        """
+        Рассчет стоимости пути из точки: рассчитывается для всех ячеек сразу,
+        position - координаты начала точки рассчета (если передана стена, выбирается ближайшая свободная),
+        при отсутствии берется первая пустая: ближайшая пустая рядом с (1, 1).
+
+        :param position: позиция с которой строятся пути
+        :return: матрицу с путями
+        :rtype: list
+        """
+        # на копии или premise
+        matrix = [item.copy() for item in self._field]
+
+        # возвращаем ближайшую свободную к переданной
+        position = self._get_near_position_for_char(matrix, position, self._char_blank)
+        if position == (-1, -1):
+            raise Exception('_path_calc: не найти свободное поле.')
+
+        # в стартовую ячейку 0 шаг, т.к. мы уже там
+        step = 0
+        matrix[position[1]][position[0]] = step
+        # решение через очередь: начинаем со стартовой и далее
+        # ищем близлежащие ячейки, берем не заполненные или с большей стоимостью пути
+        # ставим им путь +1 и бросаем в очередь обсчета
+        # список точек, которые надо обработать
+        pos4proc = [(position[0], position[1])]
+        size_x = len(matrix[0])
+        size_y = len(matrix)
+
+        while pos4proc:
+            pos = pos4proc.pop(0)
+            step = matrix[pos[1]][pos[0]] + 1
+            near_list = self._get_near_points(matrix, pos, distance=1)
+
+            # пробегаемся по координатам из near_list
+            # если пусто или цифра, меньше step, то присваиваем step
+            # и координаты запихиваем в очередь
+            for (x, y) in near_list:
+                if matrix[y][x] == self._char_blank or \
+                        str(matrix[y][x]).isdigit() and matrix[y][x] > step:
+                    matrix[y][x] = step
+                    pos4proc.append((x, y))
+        return matrix
+
     def _parse_params(self, **kwargs):
         self._user_name = kwargs['name']
         self._field_size_y = kwargs['height']
@@ -223,37 +299,6 @@ class Session:
         # TODO drop
         print('я распарсил )))')
 
-    def next_move(self, action, direction):
-        # ход игрока
-        # if (direct == 'sleep') {
-        #     url = '/action:' sleep
-        # } else {
-        #     url = '/move:' up, down, left, right
-        # }
-
-        pos_hero = self._pos_hero  # ход охотника рассчитываем на старый ход ?
-
-        # NextStepWallException
-        # NextStepEndGameException
-        if action == 'move' and direction in ('up', 'down', 'left', 'right'):
-            diff = {'up': (0, -1), 'down': (0, 1), 'left': (-1, 0), 'right': (1, 0)}
-            pos_new = tuple(map(lambda a, b: a + b, self._pos_hero, diff[direction]))
-            if self._field[pos_new[1]][pos_new[0]] == self._char_blank:
-                self._pos_hero = pos_new
-                # если я на границе и нет рядом охотника, то выиграл!
-                # если охотник рядом, то проиграл
-            else:
-                raise NextStepWallException
-        elif action == 'action' and direction == 'sleep':
-            pass
-        else:
-            raise NextStepParamException
-
-        # self._pos_hero = (self._pos_hero[0] + 1, self._pos_hero[1] + 1)
-        # ход охотника
-        # TODO drop
-        print(f"action: {action}. direction: {direction}")
-        return {'action': 'success'}
 
 class Game:
     """ игра 'выход из лабиринта' """
