@@ -121,7 +121,7 @@ def new():
     form.name.data = 'qwe'
     form.height.data = '15'
     form.width.data = '25'
-    form.difficult.data = 50
+    form.difficult.data = 60
     form.exit_count.data = 10
     form.ninja.data = True
 
@@ -166,15 +166,19 @@ def get_state():
     try:
         data = the_game.get_game(session_id)
     except NoSuchSessionException as e:
+        print('NoSuchSessionException exception')  # todo drop
         data['status'] = 'error'
         data['message'] = 'no session'
     except NoWorldException as e:
+        print('NoWorldException exception')  # todo drop
         data['status'] = 'error'
         data['message'] = 'no world'
     except EndGameException:
+        print('EndGameException exception')  # todo drop
         data['status'] = 'error'
         data['message'] = 'end game'
     except Exception as e:
+        print(f'exception: {e}')  # todo drop
         data['status'] = 'error'
         data['message'] = str(e)
     else:
@@ -195,21 +199,25 @@ def step(action, direction):
     try:
         data = the_game.next_move(session_id, action, direction)
     except NoSuchSessionException:
-        data['status'] = 'error'
-        data['message'] = 'no session'
+        print('NoSuchSessionException exception')  # todo drop
+        # data['status'] = 'error'
+        # data['message'] = 'no session'
     except NoWorldException:
-        data['status'] = 'error'
-        data['message'] = 'no world'
+        print('NoWorldException exception')  # todo drop
+        # data['status'] = 'error'
+        # data['message'] = 'no world'
     except EndGameException:
-        data['status'] = 'error'
-        data['message'] = 'end game'
+        print('EndGameException exception')  # todo drop
+        # data['status'] = 'error'
+        # data['message'] = 'end game'
     except Exception as e:
         print(e)
-        data['status'] = 'error'
-        data['message'] = str(e)
+        # data['status'] = 'error'
+        # data['message'] = str(e)
     else:
-        data['status'] = 'ok'
-        data['message'] = ''
+        pass
+        # data['status'] = 'ok'
+        # data['message'] = ''
     json_data = json.dumps(data)
     return jsonify(json_data), 200
 

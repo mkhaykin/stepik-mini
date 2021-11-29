@@ -169,8 +169,6 @@ class Session:
             pos_new = tuple(map(lambda a, b: a + b, self._pos_hero, diff[direction]))
             if self._field[pos_new[1]][pos_new[0]] == self._char_blank:
                 self._pos_hero = pos_new
-                # если я на границе и нет рядом охотника, то выиграл!
-                # если охотник рядом, то проиграл
             else:
                 raise NextStepWallException
         elif action == 'action' and direction == 'sleep':
@@ -192,7 +190,8 @@ class Session:
             if self._field[pos[1]][pos[0]] == self._char_blank and matrix[pos[1]][pos[0]] < ninja_step:
                 position = pos
                 break
-        self._pos_ninja = position
+        if position != self._pos_hero:
+            self._pos_ninja = position
 
     def _check_game_result(self):
         # если дельта координат меньше или равна 1, то проиграл
@@ -220,15 +219,13 @@ class Session:
                    [(-x, distance - x) for x in range(0, distance + 1)] +
                    [(-x, x - distance) for x in range(0, distance + 1)])
 
-    def _get_near(self, position, diffs):
+    def _get_near(self, position: tuple, diffs: list) -> list:
         """
-        Возвращает позиции на расстоянии смещения diffs с учетом размеров матрицы.
+        Возвращает координаты позиций на расстоянии смещения diffs с учетом размеров матрицы.
         Используется только в _get_near_points.
 
         :param position: позиция
         :param diffs: смещение
-        :param size_x: размер матрицы по горизонтали
-        :param size_y: размер матрицы по вертикали
         :param borders: True - возвращать позиции на границе. False - нет.
         :return:
         """
@@ -267,9 +264,9 @@ class Session:
         :return: возвращает список ближайших точек к позиции
         """
         # проверка позиции
-        if position[0] <= 0 or position[1] <= 0 or \
-                position[0] >= self._field_size_x - 1 or \
-                position[1] >= self._field_size_y - 1:
+        if position[0] < 0 or position[1] < 0 or \
+                position[0] > self._field_size_x - 1 or \
+                position[1] > self._field_size_y - 1:
             raise ValueError("_find_near_position: не корректно передана стартовая позиция")
         if str(char_find).isdigit():
             raise ValueError("_find_near_position: символ поиска не может быть числом")

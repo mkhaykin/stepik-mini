@@ -123,6 +123,12 @@ function render_field() {
     }
 }
 
+function button_change_status(status) {
+    for (let name of ['id_btn_up', 'id_btn_down', 'id_btn_left', 'id_btn_right', 'id_btn_sleep']){
+        document.getElementById(name).disabled = status
+    }
+}
+
 function render_field_onload(status, json) {
     // TODO обработка в случае отсутствия данных
     const data = JSON.parse(json);
@@ -132,14 +138,17 @@ function render_field_onload(status, json) {
 //    'hero': позиция героя
 //    'ninja': позиция ниндзи
 
-    if (data['game_status'] == 'end'){
-        alert('конец игры')
-    }
-
 // TODO добавить номер шага ((( data.step
     TableDraw(data.width, data.height, data.labyrinth, data.hero, data.ninja);
     setStatusOK();
     flgWaitForState = false;
+
+    if (data['game_status'] == 'end'){
+        alert('конец игры')
+        button_change_status(true)
+    } else {
+        button_change_status(false)
+    }
 }
 
 function render_field_onerror(status) {
