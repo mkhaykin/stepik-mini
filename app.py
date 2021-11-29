@@ -1,26 +1,21 @@
 import json
-from typing import Optional
 from flask_bootstrap import Bootstrap
 
 from config import SECRET_KEY, PORT, COOKIE
 from forms import NewGameForm
 from game import *
 
-import uuid
 
 from flask import Flask
 from flask import redirect
-from flask import url_for
 from flask import render_template
 from flask import make_response
 from flask import request
 from flask import jsonify
-from wtforms import StringField, PasswordField, BooleanField, SubmitField
-from wtforms.validators import DataRequired
 
-# app = Flask(__name__)
+
 app = Flask(__name__)
-bootstrap = Bootstrap(app)  # test
+bootstrap = Bootstrap(app)
 app.config['SECRET_KEY'] = SECRET_KEY
 
 
