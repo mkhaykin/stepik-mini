@@ -118,7 +118,7 @@ class Session:
         except Exception as err:
             self._step = None
             self._field = None
-            raise Exception from None
+            raise WorldGetException from None
 
         # самыми последними
         self._game_status = 'continue'

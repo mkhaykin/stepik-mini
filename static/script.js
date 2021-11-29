@@ -76,7 +76,7 @@ function TableDraw(col, row, labyrinth, hero, ninja){
             // |
             if (i === hero[1] && j === hero[0]) {
                 img = document.createElement("img");
-                img.src = "static/favicon.ico";
+                img.src = "static/hero.png";
                 img.style.height = '30px';
                 img.style.width = '30px';
                 td.appendChild(img);
@@ -84,7 +84,7 @@ function TableDraw(col, row, labyrinth, hero, ninja){
 
             if (i === ninja[1] && j === ninja[0]) {
                 img = document.createElement("img");
-                img.src = "static/favicon.ico";
+                img.src = "static/ninja.png";
                 img.style.height = '30px';
                 img.style.width = '30px';
                 td.appendChild(img);
