@@ -117,6 +117,14 @@ def new():
     form.exit_count.data = session_info['exit_count']
     form.ninja.data = session_info['ninja']
 
+    # TODO drop
+    form.name.data = 'qwe'
+    form.height.data = '15'
+    form.width.data = '25'
+    form.difficult.data = 50
+    form.exit_count.data = 10
+    form.ninja.data = True
+
     return render_template('new.html',
                            form=form,
                            game_run=(session_info['game_status'] == 'continue'))
@@ -163,6 +171,9 @@ def get_state():
     except NoWorldException as e:
         data['status'] = 'error'
         data['message'] = 'no world'
+    except EndGameException:
+        data['status'] = 'error'
+        data['message'] = 'end game'
     except Exception as e:
         data['status'] = 'error'
         data['message'] = str(e)
@@ -183,13 +194,17 @@ def step(action, direction):
     data = dict()
     try:
         data = the_game.next_move(session_id, action, direction)
-    except NoSuchSessionException as e:
+    except NoSuchSessionException:
         data['status'] = 'error'
         data['message'] = 'no session'
-    except NoWorldException as e:
+    except NoWorldException:
         data['status'] = 'error'
         data['message'] = 'no world'
+    except EndGameException:
+        data['status'] = 'error'
+        data['message'] = 'end game'
     except Exception as e:
+        print(e)
         data['status'] = 'error'
         data['message'] = str(e)
     else:

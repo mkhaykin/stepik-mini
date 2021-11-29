@@ -35,7 +35,7 @@ class NextStepWallException(Exception):
     """no valid params for next step"""
 
 
-class NextStepEndGameException(Exception):
+class EndGameException(Exception):
     """no valid params for next step"""
 
 
@@ -67,6 +67,9 @@ class Session:
         self._game_status = None
         self._game_result = None
 
+    def __str__(self):
+        return self._matrix_to_str(self._field)
+
     def get_session(self):
         return {'name': self._user_name,
                 'height': self._field_size_y,
@@ -83,7 +86,22 @@ class Session:
                 'labyrinth': self._field,
                 'hero': self._pos_hero,
                 'ninja': self._pos_ninja,
-                'step': self._step}
+                'step': self._step,
+                # для остановки
+                'game_status': self._game_status,
+                'game_result': self._game_result
+                }
+
+    def _parse_params(self, **kwargs):
+        self._user_name = kwargs['name']
+        self._field_size_y = kwargs['height']
+        self._field_size_x = kwargs['width']
+        self._field_difficult = kwargs['difficult']
+        self._field_exit_count = kwargs['exit_count']
+        self._ninja = kwargs['ninja']
+
+        # TODO drop
+        print('я распарсил )))')
 
     def start_game(self, **kwargs):
 
@@ -128,15 +146,22 @@ class Session:
         print(self._field)
 
     def next_move(self, action, direction):
-        # ход игрока
-        # if (direct == 'sleep') {
-        #     url = '/action:' sleep
-        # } else {
-        #     url = '/move:' up, down, left, right
-        # }
+        if self._game_status != 'continue':
+            raise EndGameException
 
-        pos_hero = self._pos_hero  # ход охотника рассчитываем на старый ход ?
+        # ход охотника
+        self._hero_move(action, direction)
 
+        # ход охотника
+        self._ninja_move()
+
+        # check game result
+        self._check_game_result()
+
+        print(f"action: {action}. direction: {direction}")
+        return {'action': 'success'}
+
+    def _hero_move(self, action, direction):
         # NextStepWallException
         # NextStepEndGameException
         if action == 'move' and direction in ('up', 'down', 'left', 'right'):
@@ -153,11 +178,33 @@ class Session:
         else:
             raise NextStepParamException
 
-        # self._pos_hero = (self._pos_hero[0] + 1, self._pos_hero[1] + 1)
-        # ход охотника
-        # TODO drop
-        print(f"action: {action}. direction: {direction}")
-        return {'action': 'success'}
+    def _ninja_move(self):
+        if self._pos_ninja == (-1, -1):
+            return
+
+        # считаем ходы от героя
+        matrix = self._path_calc(self._pos_hero)
+        # количество шагов от героя до охотника
+        ninja_step = matrix[self._pos_ninja[1]][self._pos_ninja[0]]
+        # выбираем любую точку с меньшим индексом из ближайших. отправляет туда охотника
+        position = self._pos_ninja
+        for pos in self._get_near_points(self._pos_ninja, 1):
+            if self._field[pos[1]][pos[0]] == self._char_blank and matrix[pos[1]][pos[0]] < ninja_step:
+                position = pos
+                break
+        self._pos_ninja = position
+
+    def _check_game_result(self):
+        # если дельта координат меньше или равна 1, то проиграл
+        if abs(self._pos_ninja[0] - self._pos_hero[0]) + abs(self._pos_ninja[1] - self._pos_hero[1]) <= 1:
+            self._game_status = 'end'
+            self._game_result = 'lose'
+            raise EndGameException
+        # если герой на выходе, то выиграл
+        elif self._pos_hero[0] in (0, self._field_size_x - 1) or self._pos_hero[1] in (0, self._field_size_y - 1):
+            self._game_status = 'end'
+            self._game_result = 'win'
+            raise EndGameException
 
     @staticmethod
     def _get_diffs(distance: int) -> set:
@@ -187,14 +234,10 @@ class Session:
         """
         size_x = self._field_size_x
         size_y = self._field_size_y
-        borders = False
 
         return [(position[0] + diff[0], position[1] + diff[1])
                 for diff in diffs
-                if (borders and -1 < position[0] + diff[0] < size_x and
-                    -1 < position[1] + diff[1] < size_y) or
-                (not borders and 0 < position[0] + diff[0] < (size_x - 1) and
-                 0 < position[1] + diff[1] < (size_y - 1))]
+                if 0 < position[0] + diff[0] < (size_x - 1) and 0 < position[1] + diff[1] < (size_y - 1)]
 
     def _get_near_points(self, position: tuple, distance=1) -> list:
         """
@@ -257,8 +300,8 @@ class Session:
         # на копии или premise
         matrix = [item.copy() for item in self._field]
 
-        # возвращаем ближайшую свободную к переданной
-        position = self._get_near_position_for_char(matrix, position, self._char_blank)
+        # возвращаем ближайшие свободные к переданной
+        position = self._get_near_position_for_char(position, self._char_blank)
         if position == (-1, -1):
             raise Exception('_path_calc: не найти свободное поле.')
 
@@ -276,7 +319,7 @@ class Session:
         while pos4proc:
             pos = pos4proc.pop(0)
             step = matrix[pos[1]][pos[0]] + 1
-            near_list = self._get_near_points(matrix, pos, distance=1)
+            near_list = self._get_near_points(pos, distance=1)
 
             # пробегаемся по координатам из near_list
             # если пусто или цифра, меньше step, то присваиваем step
@@ -288,16 +331,24 @@ class Session:
                     pos4proc.append((x, y))
         return matrix
 
-    def _parse_params(self, **kwargs):
-        self._user_name = kwargs['name']
-        self._field_size_y = kwargs['height']
-        self._field_size_x = kwargs['width']
-        self._field_difficult = kwargs['difficult']
-        self._field_exit_count = kwargs['exit_count']
-        self._ninja = kwargs['ninja']
+    @staticmethod
+    def _matrix_to_str(matrix: list) -> str:
+        """
+        Возвращает строку для представления двумерной матрицы.
+        Используется для отладки и в .__str__
 
-        # TODO drop
-        print('я распарсил )))')
+        :param matrix: матрица
+        :return: строка для печати
+        """
+        size_x = len(matrix[0])
+        s = '|' + '|'.join(map(lambda x: x.center(3, ' '), map(str, range(size_x)))) + '|\n'
+        s += '+' + '-' * (size_x * 4 - 1) + '+\n'
+        y = 0
+        for line in matrix:
+            s += '|' + '|'.join(map(lambda x: x.center(3, ' '), map(str, line))) + '|' + str(y) + '\n'
+            y += 1
+        s += '+' + '-' * (size_x * 4 - 1) + '+\n'
+        return s
 
 
 class Game:

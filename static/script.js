@@ -132,6 +132,10 @@ function render_field_onload(status, json) {
 //    'hero': позиция героя
 //    'ninja': позиция ниндзи
 
+    if (data['game_status'] == 'end'){
+        alert('конец игры')
+    }
+
 // TODO добавить номер шага ((( data.step
     TableDraw(data.width, data.height, data.labyrinth, data.hero, data.ninja);
     setStatusOK();
