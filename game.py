@@ -46,12 +46,26 @@ class Session:
                 'exit_count': self._field_exit_count,
                 'ninja': self._ninja}
 
+    def get_game(self):
+        return {'height': self._field_size_y,
+                'width': self._field_size_x,
+                'labyrinth': self._field,
+                'hero': self._pos_hero,
+                'ninja': self._pos_ninja}
+
     def start_game(self, **kwargs):
         self._parse_params(**kwargs)
         params = '&'.join([f'{param}={kwargs[param]}' for param in ('height', 'width', 'difficult', 'exit_count')])
-
+        params += '&char_blank=" "&char_wall="X"&borders=True'
         data = requests.get("http://labyrinths.herokuapp.com/get?" + params).json()
         self._field = data['labyrinth']
+        # устанавливаем позиции героя и противника
+        # TODO сделать нормально
+        self._pos_hero = (1, 1)
+        if kwargs['ninja']:
+            self._pos_ninja = (2, 2)
+        else:
+            self._pos_ninja = (-1, -1)
         print(self._field)
 
     def _parse_params(self, **kwargs):
