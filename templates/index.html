@@ -1,10 +1,37 @@
 {% extends "layout.html" %}
 {% block content %}
 <div class="container">
-    <div class="row mt-5 ">
+    <div class="row align-items-center justify-items-center mt-5">
         <div class="col-1"></div>
-        <div class="col text-center border bg-white shadow-sm ">  # justify-content-center align-items-center
-                <p>Привет, это игра ... бла бла asd asd asd asd asd asd as das da sd</p>
+        <div class="col border bg-white shadow-sm ">
+            <p>
+                {% if user_name %}
+                Привет, <b>{{ user_name }}</b>!
+<!--                TODO добавить персонализированную информацию о последней игре -->
+                {% else %}
+                Привет!
+                {% endif %}
+            </p>
+            <p>Описание: эта игра представляет собой пошаговую бродилку.</p>
+            <p>Цель игры: выбраться из лабиринта. Для забавы в игру может быть добавлен охотник.</p>
+            <p>Управление: интуитивное ;). Стрелки вправо/влево, назад/вперед и пропуск хода.</p>
+            <p>Примечание:
+                <ol>
+                    <li>Чтобы упростить проект, генерация лабиринта вынесена из проекта.
+                        Используется запрос к http://labyrinths.herokuapp.com/
+                    </li>
+                    <li>Для идентификации сессии используется cookies. Система не тестировалась на браузерах,
+                        с запретом на использование cookies. Надеюсь, это не будет заявлено как ошибка.
+                    </li>
+                    <li>Так же используются всплывающие окна. Если они заблокированы, поведение системы
+                        может отличаться от задуманноего. Все же это лабораторный проект.
+                    </li>
+                    <li>
+                        Основная перерисовка рабочего поля реализована через JS. Очень надеюсь, что использование
+                        JS не будет воспринято Вами как недочет.
+                    </li>
+                </ol>
+            </p>
         </div>
         <div class="col-1"></div>
     </div>
@@ -15,7 +42,7 @@
         </div>
         <div class="col-sm-2">
             <input id="btn_continue" type="button" class="btn btn-primary" value="Продолжить начатую"
-                   onClick='location.href="/game"' disabled>
+                   onClick='location.href="/game"' {% if not game_run %}disabled {% endif %}>
         </div>
     </div>
     </form>

@@ -42,24 +42,33 @@ def index():
 
     session_id = request.cookies.get(COOKIE)
     try:
-        # todo что-то криво ...
-        _ = the_game.get_session(session_id=session_id)
+        # здесь проверяем наличие сессии
+        session_info = the_game.get_session(session_id=session_id)
+        # здесь проверяем наличие мира
+        game_info = the_game.get_game(session_id=session_id)
     except NoSuchSessionException as e:
-        print(e.__class__.__name__)  # todo drop
+        print('NoSuchSessionException exception')  # todo drop
         # generate new user id and set cookies
         session_id = the_game.new_session()
         resp = make_response(render_template('index.html'))
         resp.set_cookie(COOKIE, session_id)
+    except NoWorldException as e:
+        print('NoWorldException exception')  # todo drop
+        resp = render_template('index.html', user_name='', game_run=False)
     except Exception as e:
+        print('warning: an unhandled exception')  # !
         # перенаправление на страницу с ошибкой
         # используем render_template для сокрытия адреса
         resp = render_template('error.html', exception=e)
     else:
-        # здесь проверяем наличие мира
-        resp = render_template('index.html')
+        # TODO drop
+        print(session_info)
+        print(game_info)
+        game_run = True if game_info['labyrinth'] else False
+        resp = render_template('index.html', user_name=session_info['name'], game_run=game_run)
+
 
     return resp
-    # return render_template('index.html')
 
 
 @app.route('/new', methods=['GET', 'POST'])
@@ -88,6 +97,7 @@ def new():
     except NoSuchSessionException as e:
         return redirect('/index', code=302, Response=None)
     except Exception as e:
+        print('warning: an unhandled exception')  # !
         # перенаправление на страницу с ошибкой
         # используем render_template для сокрытия адреса
         return render_template('error.html', exception=e)
@@ -95,8 +105,7 @@ def new():
         if request.form.get('btn_index') == 'Cancel':
             print('Cancel button')
             return render_template('index.html')
-            return redirect('/index', code=302, Response=None)  # не работает
-            pass  # do something
+            # return redirect('/index', code=302, Response=None)  # не работает
         elif request.form.get('btn_submit') == 'New game':
             print('Submit button')
         else:
@@ -119,7 +128,7 @@ def new():
 
             # for item in form.data:
             #     print(item)
-            return redirect('/game', code=302, Response=None)  # не работает
+            # return redirect('/game', code=302, Response=None)  # не работает
 
         resp = render_template('new.html', form=form)
 
@@ -162,6 +171,7 @@ def game():
 def get_state():
     """ информация о состоянии объекта Game"""
     session_id = request.cookies.get(COOKIE)
+    data = dict()
     try:
         data = the_game.get_game(session_id)
     except NoSuchSessionException as e:

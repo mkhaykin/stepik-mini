@@ -34,6 +34,7 @@ class Session:
         self._field = []    # двумерная матрица
 
         # позиции игроков
+        self._step = 0
         self._pos_hero = None
         self._ninja = False
         self._pos_ninja = None
@@ -51,13 +52,16 @@ class Session:
                 'width': self._field_size_x,
                 'labyrinth': self._field,
                 'hero': self._pos_hero,
-                'ninja': self._pos_ninja}
+                'ninja': self._pos_ninja,
+                'step': self._step}
 
     def start_game(self, **kwargs):
         self._parse_params(**kwargs)
         params = '&'.join([f'{param}={kwargs[param]}' for param in ('height', 'width', 'difficult', 'exit_count')])
         params += '&char_blank=" "&char_wall="X"&borders=True'
         data = requests.get("http://labyrinths.herokuapp.com/get?" + params).json()
+
+        self._step = 0
         self._field = data['labyrinth']
         # устанавливаем позиции героя и противника
         # TODO сделать нормально
@@ -66,6 +70,7 @@ class Session:
             self._pos_ninja = (2, 2)
         else:
             self._pos_ninja = (-1, -1)
+        # TODO drop
         print(self._field)
 
     def _parse_params(self, **kwargs):
