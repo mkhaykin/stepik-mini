@@ -36,6 +36,7 @@ def favicon():
 @app.route('/index', methods=['GET', 'POST'])
 @app.route('/index.html', methods=['GET', 'POST'])
 def index():
+    """Главная страница"""
     # TODO drop
     print('-------')
     print(f'//index: method {request.method} args {request.args}')
@@ -44,8 +45,8 @@ def index():
     try:
         # здесь проверяем наличие сессии
         session_info = the_game.get_session(session_id=session_id)
-        # здесь проверяем наличие мира
-        game_info = the_game.get_game(session_id=session_id)
+        # # здесь проверяем наличие мира
+        # game_info = the_game.get_game(session_id=session_id)
     except NoSuchSessionException as e:
         print('NoSuchSessionException exception')  # todo drop
         # generate new user id and set cookies
@@ -63,10 +64,10 @@ def index():
     else:
         # TODO drop
         print(session_info)
-        print(game_info)
-        game_run = True if game_info['labyrinth'] else False
-        resp = render_template('index.html', user_name=session_info['name'], game_run=game_run)
-
+        # print(game_info)
+        resp = render_template('index.html',
+                               user_name=session_info['name'],
+                               game_run=(session_info['game_status'] == 'continue'))
 
     return resp
 
@@ -74,26 +75,15 @@ def index():
 @app.route('/new', methods=['GET', 'POST'])
 @app.route('/new.html', methods=['GET', 'POST'])
 def new():
-    """Указываем параметры игры ...
-    если пользователя нет, то сначала всегда на index.html
-    """
+    """Параметры игры"""
     # TODO drop
     print('-------')
     print(f'//new: method {request.method} args {request.args}')
 
-    form = NewGameForm()
-
     session_id = request.cookies.get(COOKIE)
     try:
-        _ = the_game.get_session(session_id=session_id)
-        # если есть сессия, присваиваем старые значение полям.
-        # TODO drop
-        # form.name.data = 'test'
-        # form.height.data = 20
-        # form.width.data = 20
-        # # form.difficult.data
-        # form.exit_count.data = 5
-        # form.ninja.data = True
+        # здесь проверяем наличие сессии
+        session_info = the_game.get_session(session_id=session_id)
     except NoSuchSessionException as e:
         return redirect('/index', code=302, Response=None)
     except Exception as e:
@@ -101,38 +91,36 @@ def new():
         # перенаправление на страницу с ошибкой
         # используем render_template для сокрытия адреса
         return render_template('error.html', exception=e)
-    else:
-        if request.form.get('btn_index') == 'Cancel':
-            print('Cancel button')
-            return render_template('index.html')
-            # return redirect('/index', code=302, Response=None)  # не работает
-        elif request.form.get('btn_submit') == 'New game':
-            print('Submit button')
+
+    form = NewGameForm()
+
+    if form.validate_on_submit():  # request.method == 'POST' and
+        # заполняем параметрами мира поля ввода.
+        # делаем предупреждение, что мир существует и мы его перезатрем.
+        # делаем другие названия кнопок
+        try:
+            the_game.new_game(session_id, **form.data)
+        except NoSuchSessionException as e:
+            return redirect('/index', code=302, Response=None)
+        except Exception as e:
+            # перенаправление на страницу с ошибкой
+            # используем render_template для сокрытия адреса
+            return render_template('error.html', exception=e)
         else:
-            pass  # unknown
+            return redirect('/game', code=302, Response=None)
 
-        if form.validate_on_submit():  # request.method == 'POST' and
-            # заполняем параметрами мира поля ввода.
-            # делаем предупреждение, что мир существует и мы его перезатрем.
-            # делаем другие названия кнопок
-            try:
-                the_game.new_game(session_id, **form.data)
-            except NoSuchSessionException as e:
-                return redirect('/index', code=302, Response=None)
-            except Exception as e:
-                # перенаправление на страницу с ошибкой
-                # используем render_template для сокрытия адреса
-                return render_template('error.html', exception=e)
-            else:
-                return redirect('/game', code=302, Response=None)
+    # присваиваем сессионные значение полям.
+    form.name.data = session_info['name']
+    form.height.data = session_info['height']
+    form.width.data = session_info['width']
+    form.difficult.data = session_info['difficult']
+    form.exit_count.data = session_info['exit_count']
+    form.ninja.data = session_info['ninja']
 
-            # for item in form.data:
-            #     print(item)
-            # return redirect('/game', code=302, Response=None)  # не работает
+    return render_template('new.html',
+                           form=form,
+                           game_run=(session_info['game_status'] == 'continue'))
 
-        resp = render_template('new.html', form=form)
-
-    return resp
 
 # TODO логирование (тут и в heroku)
 # https://logtail.com/tutorials/how-to-start-logging-with-heroku/
@@ -141,10 +129,7 @@ def new():
 @app.route('/game', methods=['GET', 'POST'])
 @app.route('/game.html', methods=['GET', 'POST'])
 def game():
-    """Отправляем пользователя на игру,
-    в случае Exception: это новый пользователь и его на стартовую (index.html)
-    если пользователь есть, но игры у него пользователя нет, то на настройки (setup.html)
-    """
+    """Собственно страницы игры."""
     # TODO drop
     print('-------')
     print(f'//game: method {request.method} args {request.args}')
@@ -169,7 +154,9 @@ def game():
 @app.route('/state', methods=['GET'])
 @app.route('/state.html', methods=['GET'])
 def get_state():
-    """ информация о состоянии объекта Game"""
+    """Информация о состоянии объекта Game.
+    Фактические возвращается лабиринт с координатами.
+    Используется для отрисовки без обновления страницы."""
     session_id = request.cookies.get(COOKIE)
     data = dict()
     try:

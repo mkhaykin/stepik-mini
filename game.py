@@ -1,8 +1,5 @@
 import time
-
 import requests
-
-
 from uuid import uuid4
 
 
@@ -16,6 +13,10 @@ class ErrorWorldParamException(Exception):
 
 class NoWorldException(Exception):
     """no such user"""
+
+
+class NoGameStatusException(Exception):
+    """no such session"""
 
 
 class Session:
@@ -39,13 +40,24 @@ class Session:
         self._ninja = False
         self._pos_ninja = None
 
+        # результат игры
+        self._game_status = None
+        self._game_result = None
+
+    def _win_or_lose(self):
+        # TODO
+        result = None
+        return result
+
     def get_session(self):
         return {'name': self._user_name,
                 'height': self._field_size_y,
                 'width': self._field_size_x,
                 'difficult': self._field_difficult,
                 'exit_count': self._field_exit_count,
-                'ninja': self._ninja}
+                'ninja': self._ninja,
+                'game_status': self._game_status,
+                'game_result': self._game_result}
 
     def get_game(self):
         return {'height': self._field_size_y,
@@ -70,6 +82,11 @@ class Session:
             self._pos_ninja = (2, 2)
         else:
             self._pos_ninja = (-1, -1)
+
+        # самыми последними
+        self._game_status = 'continue'
+        self._game_result = None
+
         # TODO drop
         print(self._field)
 

@@ -48,7 +48,7 @@
             </div>
             <div class="form-group col-3">
                 <input type="button" class="btn btn-primary btn-block" value="Вернуться к игре"
-                       onClick='location.href="/"' disabled>
+                       onClick='location.href="/"' {% if not game_run %} disabled {% endif %}>
             </div>
         </div>
         <hr/>
