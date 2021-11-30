@@ -143,7 +143,7 @@ function render_field_onload(status, json) {
     flgWaitForState = false;
 
     if (data['game_status'] == 'end'){
-        alert('конец игры')
+        alert('Конец игры. You ' + data['game_result'])
         button_change_status(true)
     } else {
         button_change_status(false)

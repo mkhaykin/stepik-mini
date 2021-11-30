@@ -198,12 +198,10 @@ class Session:
         if abs(self._pos_ninja[0] - self._pos_hero[0]) + abs(self._pos_ninja[1] - self._pos_hero[1]) <= 1:
             self._game_status = 'end'
             self._game_result = 'lose'
-            raise EndGameException
         # если герой на выходе, то выиграл
         elif self._pos_hero[0] in (0, self._field_size_x - 1) or self._pos_hero[1] in (0, self._field_size_y - 1):
             self._game_status = 'end'
             self._game_result = 'win'
-            raise EndGameException
 
     @staticmethod
     def _get_diffs(distance: int) -> set:
