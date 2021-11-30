@@ -104,7 +104,8 @@ class Session:
         params = '&'.join([f'{param}={kwargs[param]}' for param in ('height', 'width', 'difficult', 'exit_count')])
         params += f'&char_blank="{self._char_blank}"&char_wall="{self._char_wall}"&borders=True'
         try:
-            data = requests.get("http://labyrinths.herokuapp.com/get?" + params).json()
+            data = requests.get("http://labyrinths.herokuapp.com/get.html?" + params).json()
+            # data = requests.get("http://127.0.0.1:8888/get.html?" + params).json()
         except Exception as e:
             raise WorldGenerateException(f"ошибка получения лабиринта: {str(e)}") from None
 
