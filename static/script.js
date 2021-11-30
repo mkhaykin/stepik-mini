@@ -1,8 +1,12 @@
 var flgWaitForState = false;
 var flgWaitForMove = false;
 
+document.addEventListener("DOMContentLoaded", function(event){
+    init();
+})
+
 function init() {
-    render_field()
+    render_field();
 }
 
 function get_json(url, json=null, callback=null, callback_onerror=null) {
@@ -40,19 +44,12 @@ function TableDrop() {
 }
 
 function TableDraw(col, row, labyrinth, hero, ninja){
-//    'height': высота
-//    'width': ширина
-//    'labyrinth': лабиринт
-//    'hero': позиция героя
-//    'ninja': позиция ниндзя
-
     TableDrop();
 
     let table_head = document.getElementById('id_game_table').getElementsByTagName('thead')[0];
     tr = table_head.insertRow();
     for (let j = 0; j < col; j++) {
         th = document.createElement('th');
-        // th.classList = "tdicon";
         th.width = 30;
         tr.appendChild(th);
     }
@@ -62,17 +59,12 @@ function TableDraw(col, row, labyrinth, hero, ninja){
         tr = table_body.insertRow(i);
         for (let j = 0; j < col; j++) {
             td = tr.insertCell();
-//            td.id = 'td_' + i + '_' + j
             if (labyrinth[i][j] === 'X') {
                 td.classList = 'cell-wall';
             } else {
                 td.classList = 'cell';
             }
 
-            //   x ---
-            // y
-            // |
-            // |
             if (i === hero[1] && j === hero[0]) {
                 img = document.createElement("img");
                 img.src = "static/hero.png";
@@ -88,7 +80,6 @@ function TableDraw(col, row, labyrinth, hero, ninja){
                 img.style.width = '30px';
                 td.appendChild(img);
             }
-            // td.style.border = '1px solid black';
         }
     }
 }
@@ -101,18 +92,20 @@ function Move(direct){
         } else {
             url = '/move:'
         }
-        url += direct
+        url += direct;
         get_json(url, null, move_onload, move_onerror);
     }
 }
 
 function move_onload(status, json) {
-    render_field()
+    // проверка ошибок
+    render_field();
     flgWaitForMove = false;
 }
 
 function move_onerror(status, json) {
     flgWaitForMove = false;
+    setStatusError();
 }
 
 function render_field() {
@@ -128,29 +121,42 @@ function button_change_status(status) {
     }
 }
 
+function show_modal_error(message) {
+    // обработка закрытия с перенаправлением
+    const elemModal = document.querySelector('#id_modal_error');
+    elemModal.addEventListener('hidden.bs.modal', function(e) {
+      window.location.href = "/index.html";
+    });
+    const elemInfo = document.querySelector('#id_text_error');
+    elemInfo.innerHTML = "При получении данных произошла ошибка:<br><b>" + message + "</b>"
+
+    var myModal = new bootstrap.Modal(document.getElementById('id_modal_error'));
+    myModal.show();
+}
+
+function show_modal_info(title, message) {
+    const elemTitle = document.querySelector('#idModalLabelInfo');
+    elemTitle.innerHTML = title;
+    const elemInfo = document.querySelector('#id_text_info');
+    elemInfo.innerHTML = message;
+
+    var myModal = new bootstrap.Modal(document.getElementById('id_modal_info'));
+    myModal.show();
+}
+
 function render_field_onload(status, json) {
     const data = JSON.parse(json);
 
     // обработка в случае отсутствия данных или ошибки
     if (!data || data.status == 'error') {
-        const elemModal = document.querySelector('#id_modal_error');
-
-        elemModal.addEventListener('hidden.bs.modal', function(e) {
-          console.log("Modal closed 1");
-          window.location.href = "/index.html";
-        });
-
-        var myModal = new bootstrap.Modal(document.getElementById('id_modal_error'));
-        myModal.show();
+        show_modal_error(data['message'])
     }
 
-    if (data.status == 'stop') {
-        // TODO обработчик stop
-    }
+//    стоп обработаем при перерисовке игрового поля
+//    if (data.status == 'stop') {
+//    }
 
-// TODO добавить номер шага ((( data.step
-
-    if (data) {
+    if (data && data.status == 'ok') {
         TableDraw(data.width, data.height, data.labyrinth, data.hero, data.ninja);
         setStatusOK();
     }
@@ -158,15 +164,18 @@ function render_field_onload(status, json) {
     flgWaitForState = false;
 
     if (data['game_status'] == 'end'){
-        const elemModal = document.querySelector('#id_modal_end');
+        button_change_status(true);
 
-        var myModal = new bootstrap.Modal(document.getElementById('id_modal_end'));
-        myModal.show();
-        // alert('Конец игры. You ' + data['game_result'])
-
-        button_change_status(true)
+        if (data['game_result'] == 'win') {
+            message = 'Поздравляем, <b>Вы победили</b>!<br><br>Еще разок? ;)'
+        } else if (data['game_result'] == 'lose') {
+            message = 'Поздравляем охотника, он большой молодец, а Вы <b>проиграли</b>!<br><br>Еще разок? ;)';
+        } else {
+            message = 'Боевая ничья? Как добились? Сообщите разработчику!';
+        }
+        show_modal_info('Игра окончена.', message);
     } else {
-        button_change_status(false)
+        button_change_status(false);
     }
 }
 
@@ -177,11 +186,10 @@ function render_field_onerror(status) {
 }
 
 function setStatusOK() {
-    // TODO
+    // nothing else
 }
 
 function setStatusError() {
-    // TODO
+    message = "Проблемы получения данных с сервера.<br>Подождите некоторое время и попробуйте повторно."
+    show_modal_info("Ошибка получения данных", message);
 }
-
-init()

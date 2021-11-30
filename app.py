@@ -92,9 +92,7 @@ def new():
             return redirect('/index', code=302, Response=None)
         except WorldGenerateException as e:
             app.logger.warning(f'new game generate exception: {str(e)}')
-            # TODO определиться куда идем
             return render_template('error.html', exception=e)
-            # return redirect('/index', code=302, Response=None)
         except Exception as e:
             app.logger.error(f'An unhandled exception:\n\tclass "{e.__class__.__name__}"\n\tmessage {str(e)}')
             # перенаправление на страницу с ошибкой
@@ -150,7 +148,7 @@ def get_state():
     # перенаправление в script.js
     # в теории мы не должны "дергать" отсутствующую сессию, но хероку засыпает, проверим ...
     except NoSuchSessionException as e:
-        app.logger.warning('/state: NoSuchSessionException exception')
+        app.logger.warning('/state: NoSuchSessionException')
         data['status'] = 'error'
         data['message'] = 'Сессия истекла или не существовала.'
     except EndGameException:
@@ -168,7 +166,6 @@ def get_state():
 
 
 @app.route('/<string:action>:<string:direction>/', methods=['GET'])
-# @app.route('/<int:action><direction>/', methods=['GET'])
 def step(action, direction):
     """Вызов хода игры.
     Примечание: вызов надуманный (можно в один параметр передавать), но такое требование к проекту"""
@@ -177,28 +174,31 @@ def step(action, direction):
     data = dict()
     try:
         data = the_game.next_move(session_id, action, direction)
-    except NoSuchSessionException:
-        print('NoSuchSessionException exception')  # todo drop
-        # data['status'] = 'error'
-        # data['message'] = 'no session'
+    # при обработке ошибок перенаправления нет, т.к. дергает JS
+    # перенаправление в script.js
+    # в теории мы не должны "дергать" отсутствующую сессию
+    except NoSuchSessionException as e:
+        app.logger.warning('/state: NoSuchSessionException')
+        data['status'] = 'error'
+        data['message'] = 'Сессия истекла или не существовала.'
     except EndGameException:
-        print('EndGameException exception')  # todo drop
-        # data['status'] = 'error'
-        # data['message'] = 'end game'
+        data['status'] = 'stop'
+        data['message'] = 'Конец игры.'
     except NextStepParamException:
-        # TODO write log
-        # так-то надо крашиться, передают лажу (
-        print('param')
-        pass
+        app.logger.error('/state: NextStepParamException')
+        data['status'] = 'error'
+        data['message'] = 'Ошибка передачи параметров.'
     except NextStepWallException:
-        print('wall')
+        # в общем не ошибка ...
         pass
     except Exception as e:
         app.logger.error(f'An unhandled exception:\n\tclass "{e.__class__.__name__}"\n\tmessage {str(e)}')
+        data['status'] = 'error'
+        data['message'] = str(e)
     else:
         pass
-        # data['status'] = 'ok'
-        # data['message'] = ''
+        data['status'] = 'ok'
+        data['message'] = ''
     json_data = json.dumps(data)
     return jsonify(json_data), 200
 
@@ -207,7 +207,8 @@ def step(action, direction):
 @app.route('/status.html', methods=['GET', 'POST'])
 def status():
     """ информация о состоянии объекта Game"""
-    # TODO возврат списка сессий и текущих ошибок
+    # TODO возврат списка сессий и текущих ошибок.
+    # сделать в версии 2 )
     data = the_game.get_status()
     s = ''
     for key, value in data.items():
@@ -215,10 +216,6 @@ def status():
     return "status \n" + s
 
 
-# TODO логирование (тут и в heroku)
-# https://logtail.com/tutorials/how-to-start-logging-with-heroku/
-
-
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=PORT, debug=True)
-    # app.run(host='0.0.0.0', port=port, debug=False)
+    # app.run(host='0.0.0.0', port=PORT, debug=True)
+    app.run(host='0.0.0.0', port=PORT, debug=False)

@@ -78,11 +78,11 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabelError">Сообщение об ошибке!</h5>
+                <h5 class="modal-title" id="idModalLabelError">Сообщение об ошибке!</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
             </div>
             <div class="modal-body">
-                <p>При получении данных произошла ошибка: ... текст ошибки ....</p>
+                <p id="id_text_error">...</p>
                 <p>Вы будете перенаправленые на главную страницу.</p>
             </div>
             <div class="modal-footer">
@@ -91,17 +91,16 @@
         </div>
     </div>
 </div>
-<!-- Модальное окно Конец Игры-->
-<div class="modal fade" id="id_modal_end" tabindex="-1" aria-labelledby="exampleModalLabelEnd" aria-hidden="true">
+<!-- Модальное окно Информация-->
+<div class="modal fade" id="id_modal_info" tabindex="-1" aria-labelledby="exampleModalLabelEnd" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabelEnd">Игра закончена.</h5>
+                <h5 class="modal-title" id="idModalLabelInfo"> ... </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
             </div>
             <div class="modal-body">
-                <p>Поздравляем, Вы выиграли/проиграли: ... текст ошибки ....</p>
-                <p>Попробуйте еще раз ;)</p>
+                <p id="id_text_info">...</p>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
