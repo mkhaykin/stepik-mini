@@ -1,4 +1,5 @@
 import json
+import logging
 from flask_bootstrap import Bootstrap
 
 from config import SECRET_KEY, PORT, COOKIE
@@ -18,6 +19,10 @@ app = Flask(__name__)
 bootstrap = Bootstrap(app)
 app.config['SECRET_KEY'] = SECRET_KEY
 
+gunicorn_logger = logging.getLogger('gunicorn.error')
+app.logger.handlers = gunicorn_logger.handlers
+app.logger.setLevel(gunicorn_logger.level)
+
 
 the_game = Game()
 
@@ -31,6 +36,12 @@ def favicon():
 @app.route('/index', methods=['GET'])
 @app.route('/index.html', methods=['GET'])
 def index():
+    # app.logger.debug('This is a DEBUG log record.')
+    # app.logger.info('This is an INFO log record.')
+    # app.logger.warning('This is a WARNING log record.')
+    # app.logger.error('This is an ERROR log record.')
+    # app.logger.critical('This is a CRITICAL log record.')
+
     """Главная страница"""
     session_id = request.cookies.get(COOKIE)
     try:
@@ -41,12 +52,8 @@ def index():
         session_id = the_game.new_session()
         resp = make_response(render_template('index.html'))
         resp.set_cookie(COOKIE, session_id)
-    # todo drop. никогда не вызовется. но вернет пустой набор
-    # except NoWorldException:
-    #     # если нет мира, то index c пустышкой
-    #     resp = render_template('index.html', user_name='', game_run=False)
     except Exception as e:
-        # TODO лог ошибки. 'warning: an unhandled exception'
+        app.logger.error(f'An unhandled exception: {str(e)}')
         # перенаправление на страницу с ошибкой
         # используем render_template для сокрытия адреса
         resp = render_template('error.html', exception=e)
@@ -69,7 +76,7 @@ def new():
         # на главную, если сесии нет
         return redirect('/index', code=302, Response=None)
     except Exception as e:
-        # TODO лог ошибки. 'warning: an unhandled exception'
+        app.logger.error(f'An unhandled exception:\n\tclass "{e.__class__.__name__}"\n\tmessage {str(e)}')
         # перенаправление на страницу с ошибкой
         # используем render_template для сокрытия адреса
         return render_template('error.html', exception=e)
@@ -84,13 +91,12 @@ def new():
             # на главную, если сесии нет
             return redirect('/index', code=302, Response=None)
         except WorldGenerateException as e:
-            # TODO лог ошибки. 'warning: an unhandled exception'
-            # на главную
-            print(f'WorldGenerateException: {str(e)}')
+            app.logger.warning(f'new game generate exception: {str(e)}')
+            # TODO определиться куда идем
             return render_template('error.html', exception=e)
             # return redirect('/index', code=302, Response=None)
         except Exception as e:
-            # TODO лог ошибки. 'warning: an unhandled exception'
+            app.logger.error(f'An unhandled exception:\n\tclass "{e.__class__.__name__}"\n\tmessage {str(e)}')
             # перенаправление на страницу с ошибкой
             # используем render_template для сокрытия адреса
             return render_template('error.html', exception=e)
@@ -113,21 +119,15 @@ def new():
 @app.route('/game', methods=['GET', 'POST'])
 @app.route('/game.html', methods=['GET', 'POST'])
 def game():
-    """Собственно страницы игры."""
-    # TODO drop
-    print('-------')
-    print(f'//game: method {request.method} args {request.args}')
-    # return render_template('game.html', world='qwe')
+    """Собственно страница игры."""
 
     session_id = request.cookies.get(COOKIE)
     try:
         _ = the_game.get_game(session_id)
     except NoSuchSessionException as e:
         resp = redirect('/index', code=302, Response=None)
-    # except NoWorldException as e:
-    #     resp = redirect('/new', code=302, Response=None)
     except Exception as e:
-        # TODO лог ошибки. 'warning: an unhandled exception'
+        app.logger.error(f'An unhandled exception:\n\tclass "{e.__class__.__name__}"\n\tmessage {str(e)}')
         # перенаправление на страницу с ошибкой
         # используем render_template для сокрытия адреса
         resp = render_template('error.html', exception=e)
@@ -159,9 +159,8 @@ def get_state():
         data['status'] = 'error'
         data['message'] = 'end game'
     except Exception as e:
-        # TODO лог ошибки. 'warning: an unhandled exception'
+        app.logger.error(f'An unhandled exception:\n\tclass "{e.__class__.__name__}"\n\tmessage {str(e)}')
         # перенаправления нет, т.к. дергает JS
-        print(f'exception: {e}')  # todo drop
         data['status'] = 'error'
         data['message'] = str(e)
     else:
@@ -174,8 +173,8 @@ def get_state():
 @app.route('/<string:action>:<string:direction>/', methods=['GET'])
 # @app.route('/<int:action><direction>/', methods=['GET'])
 def step(action, direction):
-    """ вызов хода игры
-    примечание: вызов надуманный (можно в один параметр передавать), но такое требование к проекту"""
+    """Вызов хода игры.
+    Примечание: вызов надуманный (можно в один параметр передавать), но такое требование к проекту"""
 
     session_id = request.cookies.get(COOKIE)
     data = dict()
@@ -198,11 +197,7 @@ def step(action, direction):
         print('wall')
         pass
     except Exception as e:
-        # TODO лог ошибки. 'warning: an unhandled exception'
-        # перенаправления нет, т.к. дергает JS
-        # data['status'] = 'error'
-        # data['message'] = str(e)
-        pass
+        app.logger.error(f'An unhandled exception:\n\tclass "{e.__class__.__name__}"\n\tmessage {str(e)}')
     else:
         pass
         # data['status'] = 'ok'

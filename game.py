@@ -113,9 +113,8 @@ class Session:
         params += f'&char_blank="{self._char_blank}"&char_wall="{self._char_wall}"&borders=True'
         try:
             data = requests.get("http://labyrinths.herokuapp.com/get?" + params).json()
-        except Exception as err:
-            # todo write log
-            raise WorldGenerateException("ошибка получения лабиринта") from None
+        except Exception as e:
+            raise WorldGenerateException(f"ошибка получения лабиринта: {str(e)}") from None
 
         self._step = 0
         self._field = data['labyrinth']
@@ -137,11 +136,10 @@ class Session:
             else:
                 self._pos_ninja = (-1, -1)
 
-        except Exception as err:
-            # todo write log
+        except Exception as e:
             self._step = None
             self._field = None
-            raise WorldGenerateException(str(err)) from None
+            raise WorldGenerateException(str(e)) from None
 
         # самыми последними
         self._game_status = 'continue'
