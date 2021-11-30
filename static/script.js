@@ -129,21 +129,41 @@ function button_change_status(status) {
 }
 
 function render_field_onload(status, json) {
-    // TODO обработка в случае отсутствия данных
     const data = JSON.parse(json);
-//    'height': высота
-//    'width': ширина
-//    'labyrinth': лабиринт
-//    'hero': позиция героя
-//    'ninja': позиция ниндзи
+
+    // обработка в случае отсутствия данных или ошибки
+    if (!data || data.status == 'error') {
+        const elemModal = document.querySelector('#id_modal_error');
+
+        elemModal.addEventListener('hidden.bs.modal', function(e) {
+          console.log("Modal closed 1");
+          window.location.href = "/index.html";
+        });
+
+        var myModal = new bootstrap.Modal(document.getElementById('id_modal_error'));
+        myModal.show();
+    }
+
+    if (data.status == 'stop') {
+        // TODO обработчик stop
+    }
 
 // TODO добавить номер шага ((( data.step
-    TableDraw(data.width, data.height, data.labyrinth, data.hero, data.ninja);
-    setStatusOK();
+
+    if (data) {
+        TableDraw(data.width, data.height, data.labyrinth, data.hero, data.ninja);
+        setStatusOK();
+    }
+
     flgWaitForState = false;
 
     if (data['game_status'] == 'end'){
-        alert('Конец игры. You ' + data['game_result'])
+        const elemModal = document.querySelector('#id_modal_end');
+
+        var myModal = new bootstrap.Modal(document.getElementById('id_modal_end'));
+        myModal.show();
+        // alert('Конец игры. You ' + data['game_result'])
+
         button_change_status(true)
     } else {
         button_change_status(false)

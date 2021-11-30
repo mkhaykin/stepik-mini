@@ -73,6 +73,42 @@
         <div class="col grow-fill border"></div>
     </div>
 </div>
+<!-- Модальное окно Ошибки-->
+<div class="modal fade" id="id_modal_error" tabindex="-1" aria-labelledby="exampleModalLabelError" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabelError">Сообщение об ошибке!</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+            </div>
+            <div class="modal-body">
+                <p>При получении данных произошла ошибка: ... текст ошибки ....</p>
+                <p>Вы будете перенаправленые на главную страницу.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Модальное окно Конец Игры-->
+<div class="modal fade" id="id_modal_end" tabindex="-1" aria-labelledby="exampleModalLabelEnd" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabelEnd">Игра закончена.</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+            </div>
+            <div class="modal-body">
+                <p>Поздравляем, Вы выиграли/проиграли: ... текст ошибки ....</p>
+                <p>Попробуйте еще раз ;)</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock content %}
 
 {% block scripts %}

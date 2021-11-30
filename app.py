@@ -146,21 +146,18 @@ def get_state():
     data = dict()
     try:
         data = the_game.get_game(session_id)
+    # при обработке ошибок перенаправления нет, т.к. дергает JS
+    # перенаправление в script.js
+    # в теории мы не должны "дергать" отсутствующую сессию, но хероку засыпает, проверим ...
     except NoSuchSessionException as e:
-        print('NoSuchSessionException exception')  # todo drop
+        app.logger.warning('/state: NoSuchSessionException exception')
         data['status'] = 'error'
-        data['message'] = 'no session'
-    # except NoWorldException as e:
-    #     print('NoWorldException exception')  # todo drop
-    #     data['status'] = 'error'
-    #     data['message'] = 'no world'
+        data['message'] = 'Сессия истекла или не существовала.'
     except EndGameException:
-        print('EndGameException exception')  # todo drop
-        data['status'] = 'error'
-        data['message'] = 'end game'
+        data['status'] = 'stop'
+        data['message'] = 'Конец игры.'
     except Exception as e:
         app.logger.error(f'An unhandled exception:\n\tclass "{e.__class__.__name__}"\n\tmessage {str(e)}')
-        # перенаправления нет, т.к. дергает JS
         data['status'] = 'error'
         data['message'] = str(e)
     else:
