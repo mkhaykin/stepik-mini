@@ -6,10 +6,6 @@ from uuid import uuid4
 class NoSuchSessionException(Exception):
     """no such session"""
 
-# todo drop
-# class NoWorldException(Exception):
-#     """no such user"""
-
 
 class WorldParamException(Exception):
     """no valid params for world creation"""
@@ -21,10 +17,6 @@ class WorldGetException(Exception):
 
 class WorldGenerateException(Exception):
     """can't create labyrinth"""
-
-# todo drop
-# class NoGameStatusException(Exception):
-#     """no such session"""
 
 
 class NextStepParamException(Exception):
@@ -104,8 +96,8 @@ class Session:
         self._game_status = None
         self._game_result = None
 
-        # парсим параметры, устанавливам параметры игры
-        # TODO подумать надо ли парсить в блоке try?
+        # парсим параметры, устанавливам параметры игры.
+        # в блок try не стал оборачивать: отловим на уровне app.py, т.к. ошибка глобальная.
         self._parse_params(**kwargs)
 
         # запрос лабиринта
@@ -383,7 +375,7 @@ class Game:
         return session.get_game()
 
     def get_status(self):
-        # TODO наверное переписать
+        # TODO сделать в версии 2 )
         return {'session': self._sessions}
 
 
