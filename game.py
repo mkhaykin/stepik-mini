@@ -6,9 +6,9 @@ from uuid import uuid4
 class NoSuchSessionException(Exception):
     """no such session"""
 
-
-class NoWorldException(Exception):
-    """no such user"""
+# todo drop
+# class NoWorldException(Exception):
+#     """no such user"""
 
 
 class WorldParamException(Exception):
@@ -105,6 +105,7 @@ class Session:
         self._game_result = None
 
         # парсим параметры, устанавливам параметры игры
+        # TODO подумать надо ли парсить в блоке try?
         self._parse_params(**kwargs)
 
         # запрос лабиринта
@@ -113,6 +114,7 @@ class Session:
         try:
             data = requests.get("http://labyrinths.herokuapp.com/get?" + params).json()
         except Exception as err:
+            # todo write log
             raise WorldGenerateException("ошибка получения лабиринта") from None
 
         self._step = 0
@@ -135,13 +137,11 @@ class Session:
             else:
                 self._pos_ninja = (-1, -1)
 
-        except WorldGetException as err:
+        except Exception as err:
+            # todo write log
             self._step = None
             self._field = None
             raise WorldGenerateException(str(err)) from None
-        except Exception as err:
-            # todo save to log
-            pass
 
         # самыми последними
         self._game_status = 'continue'
@@ -369,14 +369,7 @@ class Game:
             raise NoSuchSessionException
 
         session = self._sessions[session_id]
-        try:
-            # начинаем игру: параметры передаем словарем
-            session.start_game(**kwargs)
-        except LookupError as e:
-            raise WorldParamException from None
-        except Exception as e:
-            # todo write log
-            pass
+        session.start_game(**kwargs)
 
     def next_move(self, session_id, action, direction):
         if session_id is None or session_id not in self._sessions:
@@ -389,14 +382,10 @@ class Game:
         if session_id is None or session_id not in self._sessions:
             raise NoSuchSessionException
         session = self._sessions[session_id]
-        try:
-            game = session.get_game()
-        except Exception as e:
-            raise NoWorldException from None
-
-        return game
+        return session.get_game()
 
     def get_status(self):
+        # TODO наверное переписать
         return {'session': self._sessions}
 
 

@@ -24,5 +24,3 @@ class NewGameForm(FlaskForm):
                          render_kw={'id': 'id_ninja'})
 
     btn_submit = SubmitField('Начать игру', render_kw={'class': 'btn btn-primary'})
-    # btn_index = SubmitField(label='На главную')  # , render_kw={"onclick": 'location.href=\"/index.html\"'}
-    # btn_game = SubmitField(label='Вернуться в игру', render_kw={'class': 'btn btn-primary', 'disable': ''})  # , render_kw={"onclick": 'location.href=\"/index.html\"'}

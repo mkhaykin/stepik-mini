@@ -27,43 +27,33 @@ def favicon():
     return app.send_static_file('favicon.ico')
 
 
-@app.route('/', methods=['GET', 'POST'])
-@app.route('/index', methods=['GET', 'POST'])
-@app.route('/index.html', methods=['GET', 'POST'])
+@app.route('/', methods=['GET'])
+@app.route('/index', methods=['GET'])
+@app.route('/index.html', methods=['GET'])
 def index():
     """Главная страница"""
-    # TODO drop
-    print('-------')
-    print(f'//index: method {request.method} args {request.args}')
-
     session_id = request.cookies.get(COOKIE)
     try:
         # здесь проверяем наличие сессии
         session_info = the_game.get_session(session_id=session_id)
-        # # здесь проверяем наличие мира
-        # game_info = the_game.get_game(session_id=session_id)
-    except NoSuchSessionException as e:
-        print('NoSuchSessionException exception')  # todo drop
-        # generate new user id and set cookies
+    except NoSuchSessionException:
+        # новый пользователь: отправляем куки
         session_id = the_game.new_session()
         resp = make_response(render_template('index.html'))
         resp.set_cookie(COOKIE, session_id)
-    except NoWorldException as e:
-        print('NoWorldException exception')  # todo drop
-        resp = render_template('index.html', user_name='', game_run=False)
+    # todo drop. никогда не вызовется. но вернет пустой набор
+    # except NoWorldException:
+    #     # если нет мира, то index c пустышкой
+    #     resp = render_template('index.html', user_name='', game_run=False)
     except Exception as e:
-        print('warning: an unhandled exception')  # !
+        # TODO лог ошибки. 'warning: an unhandled exception'
         # перенаправление на страницу с ошибкой
         # используем render_template для сокрытия адреса
         resp = render_template('error.html', exception=e)
     else:
-        # TODO drop
-        print(session_info)
-        # print(game_info)
         resp = render_template('index.html',
                                user_name=session_info['name'],
                                game_run=(session_info['game_status'] == 'continue'))
-
     return resp
 
 
@@ -71,33 +61,36 @@ def index():
 @app.route('/new.html', methods=['GET', 'POST'])
 def new():
     """Параметры игры"""
-    # TODO drop
-    print('-------')
-    print(f'//new: method {request.method} args {request.args}')
-
     session_id = request.cookies.get(COOKIE)
     try:
         # здесь проверяем наличие сессии
         session_info = the_game.get_session(session_id=session_id)
     except NoSuchSessionException as e:
+        # на главную, если сесии нет
         return redirect('/index', code=302, Response=None)
     except Exception as e:
-        print('warning: an unhandled exception')  # !
+        # TODO лог ошибки. 'warning: an unhandled exception'
         # перенаправление на страницу с ошибкой
         # используем render_template для сокрытия адреса
         return render_template('error.html', exception=e)
 
     form = NewGameForm()
 
-    if form.validate_on_submit():  # request.method == 'POST' and
-        # заполняем параметрами мира поля ввода.
-        # делаем предупреждение, что мир существует и мы его перезатрем.
-        # делаем другие названия кнопок
+    if form.validate_on_submit():
+        # создаем игру из переданных параметров
         try:
             the_game.new_game(session_id, **form.data)
         except NoSuchSessionException as e:
+            # на главную, если сесии нет
             return redirect('/index', code=302, Response=None)
+        except WorldGenerateException as e:
+            # TODO лог ошибки. 'warning: an unhandled exception'
+            # на главную
+            print(f'WorldGenerateException: {str(e)}')
+            return render_template('error.html', exception=e)
+            # return redirect('/index', code=302, Response=None)
         except Exception as e:
+            # TODO лог ошибки. 'warning: an unhandled exception'
             # перенаправление на страницу с ошибкой
             # используем render_template для сокрытия адреса
             return render_template('error.html', exception=e)
@@ -131,9 +124,10 @@ def game():
         _ = the_game.get_game(session_id)
     except NoSuchSessionException as e:
         resp = redirect('/index', code=302, Response=None)
-    except NoWorldException as e:
-        resp = redirect('/new', code=302, Response=None)
+    # except NoWorldException as e:
+    #     resp = redirect('/new', code=302, Response=None)
     except Exception as e:
+        # TODO лог ошибки. 'warning: an unhandled exception'
         # перенаправление на страницу с ошибкой
         # используем render_template для сокрытия адреса
         resp = render_template('error.html', exception=e)
@@ -156,15 +150,17 @@ def get_state():
         print('NoSuchSessionException exception')  # todo drop
         data['status'] = 'error'
         data['message'] = 'no session'
-    except NoWorldException as e:
-        print('NoWorldException exception')  # todo drop
-        data['status'] = 'error'
-        data['message'] = 'no world'
+    # except NoWorldException as e:
+    #     print('NoWorldException exception')  # todo drop
+    #     data['status'] = 'error'
+    #     data['message'] = 'no world'
     except EndGameException:
         print('EndGameException exception')  # todo drop
         data['status'] = 'error'
         data['message'] = 'end game'
     except Exception as e:
+        # TODO лог ошибки. 'warning: an unhandled exception'
+        # перенаправления нет, т.к. дергает JS
         print(f'exception: {e}')  # todo drop
         data['status'] = 'error'
         data['message'] = str(e)
@@ -189,18 +185,24 @@ def step(action, direction):
         print('NoSuchSessionException exception')  # todo drop
         # data['status'] = 'error'
         # data['message'] = 'no session'
-    except NoWorldException:
-        print('NoWorldException exception')  # todo drop
-        # data['status'] = 'error'
-        # data['message'] = 'no world'
     except EndGameException:
         print('EndGameException exception')  # todo drop
         # data['status'] = 'error'
         # data['message'] = 'end game'
+    except NextStepParamException:
+        # TODO write log
+        # так-то надо крашиться, передают лажу (
+        print('param')
+        pass
+    except NextStepWallException:
+        print('wall')
+        pass
     except Exception as e:
-        print(e)
+        # TODO лог ошибки. 'warning: an unhandled exception'
+        # перенаправления нет, т.к. дергает JS
         # data['status'] = 'error'
         # data['message'] = str(e)
+        pass
     else:
         pass
         # data['status'] = 'ok'
@@ -213,11 +215,11 @@ def step(action, direction):
 @app.route('/status.html', methods=['GET', 'POST'])
 def status():
     """ информация о состоянии объекта Game"""
+    # TODO возврат списка сессий и текущих ошибок
     data = the_game.get_status()
     s = ''
     for key, value in data.items():
         s += f'{key}: \t {value}\n'
-    # print(s)
     return "status \n" + s
 
 
