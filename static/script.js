@@ -27,7 +27,6 @@ function get_json(url, json=null, callback=null, callback_onerror=null) {
     xhr.send(JSON.stringify(json));
 }
 
-
 function TableDrop() {
     let table = document.getElementById('id_game_table');
 

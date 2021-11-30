@@ -7,9 +7,14 @@
     <div>
     <form action="" method="post" class="form" role="form">
         {{ form.hidden_tag() }}
-        <div class="form-group col-3">
+        <div class="form-group col-12">
            {{form.name.label(class="form-label")}}
-           {{form.name(class="form-control")}}
+            <div class="row align-items-center justify-items-center">
+                <div class="col-3">{{form.name(class="form-control")}}</div>
+                <div class="col-3">
+                    <input type="button" class="btn btn-primary" value="тестовые значения" onClick="setValue()">
+                </div>
+            </div>
            <small id="nameHelp" class="form-text text-muted">от 3 до 30 символов.</small>
         </div>
         <hr/>
@@ -63,3 +68,7 @@
         </div>
 </div>
 {% endblock content %}
+
+{% block scripts %}
+	<script type="application/javascript" src="static/new.js"></script>
+{% endblock %}

@@ -112,14 +112,6 @@ def new():
     form.exit_count.data = session_info['exit_count']
     form.ninja.data = session_info['ninja']
 
-    # TODO drop
-    form.name.data = 'qwe'
-    form.height.data = '15'
-    form.width.data = '25'
-    form.difficult.data = 60
-    form.exit_count.data = 10
-    form.ninja.data = True
-
     return render_template('new.html',
                            form=form,
                            game_run=(session_info['game_status'] == 'continue'))
