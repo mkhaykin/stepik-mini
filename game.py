@@ -22,9 +22,9 @@ class WorldGetException(Exception):
 class WorldGenerateException(Exception):
     """can't create labyrinth"""
 
-
-class NoGameStatusException(Exception):
-    """no such session"""
+# todo drop
+# class NoGameStatusException(Exception):
+#     """no such session"""
 
 
 class NextStepParamException(Exception):
@@ -100,66 +100,64 @@ class Session:
         self._field_exit_count = kwargs['exit_count']
         self._ninja = kwargs['ninja']
 
-        # TODO drop
-        print('я распарсил )))')
-
     def start_game(self, **kwargs):
+        self._game_status = None
+        self._game_result = None
 
+        # парсим параметры, устанавливам параметры игры
         self._parse_params(**kwargs)
+
+        # запрос лабиринта
         params = '&'.join([f'{param}={kwargs[param]}' for param in ('height', 'width', 'difficult', 'exit_count')])
         params += f'&char_blank="{self._char_blank}"&char_wall="{self._char_wall}"&borders=True'
         try:
             data = requests.get("http://labyrinths.herokuapp.com/get?" + params).json()
         except Exception as err:
-            raise WorldGetException from None
+            raise WorldGenerateException("ошибка получения лабиринта") from None
 
         self._step = 0
         self._field = data['labyrinth']
 
         try:
             # устанавливаем позицию героя и противника
-            # TODO сделать нормально
             self._pos_hero = self._get_near_position_for_char((self._field_size_x // 2, self._field_size_y // 2),
                                                               self._char_blank)
             if self._pos_hero == (-1, -1):
-                # TODO ошибка генерации лабиринта
-                raise Exception
+                # нет возможности поставить героя: ошибка генерации лабиринта
+                raise WorldGenerateException('нет возможности поставить героя')
 
-            # устанавливаем позицию противника
+            # устанавливаем позицию охотника
             if kwargs['ninja']:
                 self._pos_ninja = self._get_near_position_for_char((1, 1), self._char_blank)
                 if self._pos_ninja == (-1, -1):
-                    # TODO ошибка генерации лабиринта
-                    raise Exception
+                    # нет возможности поставить охотника: ошибка генерации лабиринта
+                    raise WorldGenerateException('нет возможности поставить охотника')
             else:
                 self._pos_ninja = (-1, -1)
-        except Exception as err:
+
+        except WorldGetException as err:
             self._step = None
             self._field = None
-            raise WorldGetException from None
+            raise WorldGenerateException(str(err)) from None
+        except Exception as err:
+            # todo save to log
+            pass
 
         # самыми последними
         self._game_status = 'continue'
         self._game_result = None
 
-        # TODO drop
-        print(self._field)
-
     def next_move(self, action, direction):
         if self._game_status != 'continue':
             raise EndGameException
 
-        # ход охотника
+        # ход героя
         self._hero_move(action, direction)
-
         # ход охотника
         self._ninja_move()
-
-        # check game result
+        # проверка результатов игры
         self._check_game_result()
-
-        print(f"action: {action}. direction: {direction}")
-        return {'action': 'success'}
+        return
 
     def _hero_move(self, action, direction):
         # NextStepWallException
@@ -369,18 +367,21 @@ class Game:
     def new_game(self, session_id, **kwargs):
         if session_id is None or session_id not in self._sessions:
             raise NoSuchSessionException
-        # заполняем параметры игры
+
         session = self._sessions[session_id]
         try:
+            # начинаем игру: параметры передаем словарем
             session.start_game(**kwargs)
         except LookupError as e:
             raise WorldParamException from None
         except Exception as e:
-            print(e)
+            # todo write log
+            pass
 
     def next_move(self, session_id, action, direction):
         if session_id is None or session_id not in self._sessions:
             raise NoSuchSessionException
+
         session = self._sessions[session_id]
         session.next_move(action, direction)
 
