@@ -1,4 +1,3 @@
-import json
 import logging
 from flask_bootstrap import Bootstrap
 
@@ -6,15 +5,13 @@ from config import SECRET_KEY, PORT, COOKIE
 from forms import NewGameForm
 from game import *
 
-
 from flask import Flask
 from flask import redirect
 from flask import render_template
 from flask import make_response
 from flask import request
 from flask import jsonify
-
-from flask import url_for, session
+from flask import session
 
 app = Flask(__name__)
 bootstrap = Bootstrap(app)
@@ -24,6 +21,8 @@ gunicorn_logger = logging.getLogger('gunicorn.error')
 app.logger.handlers = gunicorn_logger.handlers
 app.logger.setLevel(gunicorn_logger.level)
 
+log = logging.getLogger('werkzeug')
+log.setLevel(logging.ERROR)
 
 the_game = Game()
 
@@ -250,13 +249,13 @@ def step(action, direction):
         data['message'] = 'Ошибка передачи параметров.'
     except NextStepWallException:
         # в общем не ошибка ...
-        pass
+        data['status'] = 'ok'
+        data['message'] = ''
     except Exception as e:
         app.logger.error(f'An unhandled exception:\n\tclass "{e.__class__.__name__}"\n\tmessage {str(e)}')
         data['status'] = 'error'
         data['message'] = str(e)
     else:
-        pass
         data['status'] = 'ok'
         data['message'] = ''
     json_data = json.dumps(data)
@@ -279,5 +278,5 @@ def status():
 if __name__ == '__main__':
     ping_heroku()  # )
 
-    app.run(host='0.0.0.0', port=PORT, debug=True)
-    # app.run(host='0.0.0.0', port=PORT, debug=False)
+    # app.run(host='0.0.0.0', port=PORT, debug=True)
+    app.run(host='0.0.0.0', port=PORT, debug=False)
