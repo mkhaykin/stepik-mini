@@ -8,6 +8,7 @@ document.addEventListener("DOMContentLoaded", function(event){
 function init() {
     render_field();
     window.addEventListener('keydown', e => checkArrow(e));
+    document.getElementById('id_game_div').focus();
 }
 
 function checkArrow(e) {
