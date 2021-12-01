@@ -7,8 +7,27 @@ document.addEventListener("DOMContentLoaded", function(event){
 
 function init() {
     render_field();
+    window.addEventListener('keydown', e => checkArrow(e));
 }
 
+function checkArrow(e) {
+    e = e || window.event;
+    if (e.keyCode == '38') {
+        Move('up')
+    }
+    else if (e.keyCode == '40') {
+        Move('down')
+    }
+    else if (e.keyCode == '37') {
+        Move('left')
+    }
+    else if (e.keyCode == '39') {
+        Move('right')
+    }
+    else if (e.keyCode == '32') {
+        Move('sleep')
+    }
+}
 function get_json(url, json=null, callback=null, callback_onerror=null) {
     // url              - url for request
     // callback         - function on load
