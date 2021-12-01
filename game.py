@@ -1,5 +1,6 @@
 import time
 import requests
+import json
 from uuid import uuid4
 
 
@@ -47,7 +48,7 @@ class Session:
         self._field_size_y = None
         self._field_difficult = None
         self._field_exit_count = None
-        self._field = []    # двумерная матрица
+        self._field = []  # двумерная матрица
 
         # позиции игроков
         self._step = 0
@@ -59,8 +60,32 @@ class Session:
         self._game_status = None
         self._game_result = None
 
+    def _clear_data(self):
+        """Очистка данных перед началом игры"""
+        # данные лабиринта
+        self._field_size_x = None
+        self._field_size_y = None
+        self._field_difficult = None
+        self._field_exit_count = None
+        self._field = []  # двумерная матрица
+
+        # позиции игроков
+        self._step = 0
+        self._pos_hero = None
+        self._ninja = False
+        self._pos_ninja = None
+
+        # результат игры
+        self._game_status = None
+        self._game_result = None
+
+    def _start_data(self):
+        self._step = 0
+        self._game_status = 'continue'
+        self._game_result = None
+
     def __str__(self):
-        return self._matrix_to_str(self._field)
+        return matrix_to_str(self._field)
 
     def get_session(self):
         return {'name': self._user_name,
@@ -92,55 +117,110 @@ class Session:
         self._field_exit_count = kwargs['exit_count']
         self._ninja = kwargs['ninja']
 
+    def _load_labyrinth_from_url(self):
+        # запрос лабиринта
+        params = '&'.join([f'{key}={value}'
+                           for key, value in {'height': self._field_size_y,
+                                              'width': self._field_size_x,
+                                              'difficult': self._field_difficult,
+                                              'exit_count': self._field_exit_count}.items()])
+        params += f'&char_blank="{self._char_blank}"&char_wall="{self._char_wall}"&borders=True'
+        url = "http://labyrinths.herokuapp.com/get.html?" + params
+        # url = "http://127.0.0.1:8888/get_.html?" + params
+        try:
+            req = requests.get(url)
+            if req.status_code != 200:
+                error = f"url: {url}\nответ: {req.status_code}\nописание: {req.reason}"
+                raise WorldGenerateException(error)
+            labyrinth = req.json()
+        except WorldGenerateException:
+            self._clear_data()
+            raise
+        except Exception as e:
+            self._clear_data()
+            raise WorldGenerateException(str(e))
+        else:
+            self._field = labyrinth['labyrinth']
+            self._field_size_y = labyrinth['height']
+            self._field_size_x = labyrinth['width']
+
     def start_game(self, **kwargs):
-        self._game_status = None
-        self._game_result = None
+        self._clear_data()
 
         # парсим параметры, устанавливам параметры игры.
         # в блок try не стал оборачивать: отловим на уровне app.py, т.к. ошибка глобальная.
         self._parse_params(**kwargs)
 
-        # запрос лабиринта
-        params = '&'.join([f'{param}={kwargs[param]}' for param in ('height', 'width', 'difficult', 'exit_count')])
-        params += f'&char_blank="{self._char_blank}"&char_wall="{self._char_wall}"&borders=True'
-        # TODO перенести в отдельный метод
-        try:
-            req = requests.get("http://labyrinths.herokuapp.com/get.html?" + params)
-            if req.status_code != 200:
-                raise WorldGenerateException(f"статуса: {req.status_code}")
-            data = req.json()
-            # data = requests.get("http://127.0.0.1:8888/get.html?" + params).json()
-        except Exception as e:
-            raise WorldGenerateException(f"ошибка получения лабиринта. доп инф: {str(e)}") from None
+        self._load_labyrinth_from_url()
+        self._set_pos_hero()
+        self._set_pos_ninja()
 
-        self._step = 0
-        self._field = data['labyrinth']
+        self._start_data()
 
+    def _set_pos_hero(self):
         try:
-            # устанавливаем позицию героя и противника
+            # устанавливаем позицию героя
             self._pos_hero = self._get_near_position_for_char((self._field_size_x // 2, self._field_size_y // 2),
                                                               self._char_blank)
             if self._pos_hero == (-1, -1):
                 # нет возможности поставить героя: ошибка генерации лабиринта
-                raise WorldGenerateException('нет возможности поставить героя')
+                raise WorldGenerateException('Нет возможности поставить героя.')
 
-            # устанавливаем позицию охотника
-            if kwargs['ninja']:
-                self._pos_ninja = self._get_near_position_for_char((1, 1), self._char_blank)
-                if self._pos_ninja == (-1, -1):
-                    # нет возможности поставить охотника: ошибка генерации лабиринта
-                    raise WorldGenerateException('нет возможности поставить охотника')
-            else:
-                self._pos_ninja = (-1, -1)
-
+        except WorldGenerateException:
+            self._clear_data()
+            raise
         except Exception as e:
-            self._step = None
-            self._field = None
-            raise WorldGenerateException(str(e)) from None
+            self._clear_data()
+            raise
 
-        # самыми последними
-        self._game_status = 'continue'
-        self._game_result = None
+    def _set_pos_ninja(self):
+        if not self._ninja:
+            self._pos_ninja = (-1, -1)
+            return
+
+        try:
+            # устанавливаем позицию охотника
+            self._pos_ninja = self._get_near_position_for_char((1, 1), self._char_blank)
+            if self._pos_ninja == (-1, -1):
+                # нет возможности поставить охотника: ошибка генерации лабиринта
+                raise WorldGenerateException('Нет возможности поставить охотника')
+
+        except WorldGenerateException:
+            self._clear_data()
+            raise
+        except Exception as e:
+            self._clear_data()
+            raise
+
+    def load_game(self, idx_labyrinth):
+        self._clear_data()
+
+        self._load_labyrinth_from_file(idx_labyrinth)
+
+        self._set_pos_hero()
+        self._ninja = True
+        self._set_pos_ninja()
+
+        self._start_data()
+
+    def _load_labyrinth_from_file(self, idx_labyrinth: int, file_name: str = 'labyrinth.json') -> None:
+        self._clear_data()
+        assert type(idx_labyrinth) is int, 'ошибка в параметрах'
+        try:
+            with open(file_name, 'r') as f:
+                labyrinth_list = json.load(f)
+            labyrinth = labyrinth_list[idx_labyrinth]
+            self._field = labyrinth['matrix']
+            self._field_size_y = labyrinth['height']
+            self._field_size_x = labyrinth['width']
+
+            # TODO проверка загруженных данных на корректность
+            # в ver 0.2
+        except Exception:
+            self._clear_data()
+            raise WorldGenerateException("Ошибка загрузки файла")
+        else:
+            self._start_data()
 
     def next_move(self, action, direction):
         if self._game_status != 'continue':
@@ -301,8 +381,8 @@ class Session:
         # ставим им путь +1 и бросаем в очередь обсчета
         # список точек, которые надо обработать
         pos4proc = [(position[0], position[1])]
-        size_x = len(matrix[0])
-        size_y = len(matrix)
+        # size_x = len(matrix[0])
+        # size_y = len(matrix)
 
         while pos4proc:
             pos = pos4proc.pop(0)
@@ -319,24 +399,24 @@ class Session:
                     pos4proc.append((x, y))
         return matrix
 
-    @staticmethod
-    def _matrix_to_str(matrix: list) -> str:
-        """
-        Возвращает строку для представления двумерной матрицы.
-        Используется для отладки и в .__str__
 
-        :param matrix: матрица
-        :return: строка для печати
-        """
-        size_x = len(matrix[0])
-        s = '|' + '|'.join(map(lambda x: x.center(3, ' '), map(str, range(size_x)))) + '|\n'
-        s += '+' + '-' * (size_x * 4 - 1) + '+\n'
-        y = 0
-        for line in matrix:
-            s += '|' + '|'.join(map(lambda x: x.center(3, ' '), map(str, line))) + '|' + str(y) + '\n'
-            y += 1
-        s += '+' + '-' * (size_x * 4 - 1) + '+\n'
-        return s
+def matrix_to_str(matrix: list) -> str:
+    """
+    Возвращает строку для представления двумерной матрицы.
+    Используется для отладки и в .__str__
+
+    :param matrix: матрица
+    :return: строка для печати
+    """
+    size_x = len(matrix[0])
+    s = '|' + '|'.join(map(lambda x: x.center(3, ' '), map(str, range(size_x)))) + '|\n'
+    s += '+' + '-' * (size_x * 4 - 1) + '+\n'
+    y = 0
+    for line in matrix:
+        s += '|' + '|'.join(map(lambda x: x.center(3, ' '), map(str, line))) + '|' + str(y) + '\n'
+        y += 1
+    s += '+' + '-' * (size_x * 4 - 1) + '+\n'
+    return s
 
 
 class Game:
@@ -382,6 +462,13 @@ class Game:
     def get_status(self):
         # TODO сделать в версии 2 )
         return {'session': self._sessions}
+
+    def load_game(self, session_id, idx_labyrinth):
+        if session_id is None or session_id not in self._sessions:
+            raise NoSuchSessionException
+
+        session = self._sessions[session_id]
+        session.load_game(idx_labyrinth)
 
 
 if __name__ == "__main__":

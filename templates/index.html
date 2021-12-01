@@ -46,16 +46,16 @@
         </div>
         <div class="col-1"></div>
     </div>
-    <form action="" method="post" novalidate>
+<!--    <form action="" method="post" novalidate>-->
     <div class="form-row row justify-content-center mt-5">
         <div class="col-sm-2">
-            <input id="btn_new" type="button" class="btn btn-primary" value="Новая игра" onClick='location.href="/new"'>
+            <input id="id_btn_new" type="button" class="btn btn-primary" value="Новая игра" onClick='location.href="/new"'>
         </div>
         <div class="col-sm-2">
-            <input id="btn_continue" type="button" class="btn btn-primary" value="Продолжить игру"
+            <input id="id_btn_continue" type="button" class="btn btn-primary" value="Продолжить игру"
                    onClick='location.href="/game"' {% if not game_run %} disabled {% endif %}>
         </div>
     </div>
-    </form>
+<!--    </form>-->
 </div>
 {% endblock content %}

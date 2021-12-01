@@ -1,0 +1,53 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="container">
+    <div class="row align-items-center justify-items-center mt-5">
+        <div class="col-1"></div>
+        <div class="col border bg-white shadow-sm ">
+            <details>
+                <summary><b>При загрузке лабиринта с внешнего ресурса произошла ошибка.</b></summary>
+                <pre>{{ error }}</pre>
+            </details>
+            <br>
+            <p>Для продолжения игры выберите любой из ранее сохраненных лабиринтов или повторите попытку позже.</p>
+            <form action="" method="post" novalidate>
+                <div class="form-row row justify-content-center">
+                    <div class="col-sm-3">
+                        <input id="id_btn_main" type="button" class="btn btn-primary" value="На главную" onClick='location.href="/index"'>
+                    </div>
+                    <div class="col-sm-3">
+                        <input id="id_btn_new" type="button" class="btn btn-primary" value="Попробовать еще раз" onClick='location.href="/new"'>
+                    </div>
+                    {% if labyrinth_list %}
+                    <div class="col-sm-3">
+                        <input id="id_btn_load" type="submit" class="btn btn-primary" value="Загрузить выбранный">
+                    </div>
+                    {% endif%}
+                </div>
+<!--                    блок вставки образцов-->
+                {% if labyrinth_list %}
+                <div class="form-row row justify-content-center mt-3">
+                    {% for labyrinth in labyrinth_list %}
+                    <p>
+                        <input type="radio" value="{{ loop.index0 }}" {% if loop.index0 == 0 %} checked {% endif %} name="idx_labyrinth"/>
+                    Ширина: {{ labyrinth['width'] }}, высота: {{ labyrinth['height'] }}.<br>
+                        <pre>{{ labyrinth['matrix'] }}</pre>
+                        </input>
+                    </p>
+                    <p>
+                        <input id="id_btn_load{{ loop.index }}" type="submit" class="btn btn-primary" value="Загрузить выбранный">
+                    {% endfor %}
+                    </p>
+                </div>
+                {% endif%}
+            </form>
+
+
+        </div>
+        <div class="col-1"></div>
+    </div>
+</div>
+Выберите лабиринт:  <br>
+error {{ error }} <br>
+labyrinth_list {{ labyrinth_list }}
+{% endblock content %}

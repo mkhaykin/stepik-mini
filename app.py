@@ -14,6 +14,7 @@ from flask import make_response
 from flask import request
 from flask import jsonify
 
+from flask import url_for, session
 
 app = Flask(__name__)
 bootstrap = Bootstrap(app)
@@ -92,7 +93,10 @@ def new():
             return redirect('/index', code=302, Response=None)
         except WorldGenerateException as e:
             app.logger.warning(f'new game generate exception: {str(e)}')
-            return render_template('error.html', exception=e)
+            # страница загрузки сохраненного лабиринта
+            # ошибку бросаем в сессию
+            session['error'] = str(e)
+            return redirect('/load', code=302, Response=None)
         except Exception as e:
             app.logger.error(f'An unhandled exception:\n\tclass "{e.__class__.__name__}"\n\tmessage {str(e)}')
             # перенаправление на страницу с ошибкой
@@ -114,8 +118,55 @@ def new():
                            game_run=(session_info['game_status'] == 'continue'))
 
 
-@app.route('/game', methods=['GET', 'POST'])
-@app.route('/game.html', methods=['GET', 'POST'])
+@app.route('/load', methods=['GET', 'POST'])
+@app.route('/load.html', methods=['GET', 'POST'])
+def load(error=None):
+    """Страница загрузки игры."""
+    session_id = request.cookies.get(COOKIE)
+    try:
+        _ = the_game.get_session(session_id)
+    except NoSuchSessionException as e:
+        return redirect('/index', code=302, Response=None)
+    except Exception as e:
+        app.logger.error(f'An unhandled exception:\n\tclass "{e.__class__.__name__}"\n\tmessage {str(e)}')
+        # перенаправление на страницу с ошибкой
+        # используем render_template для сокрытия адреса
+        return render_template('error.html', exception=e)
+
+    if request.method == 'POST':
+        try:
+            idx_labyrinth = int(request.form.get('idx_labyrinth'))
+            the_game.load_game(session_id, idx_labyrinth)
+        except Exception as e:
+            app.logger.error(f'An unhandled exception:\n\tclass "{e.__class__.__name__}"\n\tmessage {str(e)}')
+            # перенаправление на страницу с ошибкой
+            # используем render_template для сокрытия адреса
+            return render_template('error.html', exception=e, message="Не возможно создать игру из файла для загрузки")
+        else:
+            return redirect('/game', code=302, Response=None)
+
+    try:
+        # готовим список лабиринтов
+        with open('labyrinth.json', 'r') as f:
+            labyrinth_list = json.load(f)
+        # правим матрицу под строчный вывод
+        for labyrinth in labyrinth_list:
+            labyrinth['matrix'] = matrix_to_str(labyrinth['matrix'])
+    except Exception as e:
+        app.logger.error(f'An unhandled exception:\n\tclass "{e.__class__.__name__}"\n\tmessage {str(e)}')
+        # перенаправление на страницу с ошибкой
+        # используем render_template для сокрытия адреса
+        return render_template('error.html', exception=e, message="нет файла 'labyrinth.json' с примерами лабиринтов")
+
+    if session.get('error'):
+        error = session['error']
+        del session['error']
+
+    return render_template('load.html', error=error, labyrinth_list=labyrinth_list)
+
+
+@app.route('/game', methods=['GET'])
+@app.route('/game.html', methods=['GET'])
 def game():
     """Собственно страница игры."""
 
@@ -217,5 +268,5 @@ def status():
 
 
 if __name__ == '__main__':
-    # app.run(host='0.0.0.0', port=PORT, debug=True)
-    app.run(host='0.0.0.0', port=PORT, debug=False)
+    app.run(host='0.0.0.0', port=PORT, debug=True)
+    # app.run(host='0.0.0.0', port=PORT, debug=False)
