@@ -10,9 +10,8 @@
     <div class="row row-eq-height">
         <div class="col grow-fill"></div>
         <div class="col-2 d-flex flex-column border">
-            <div class="row flex-fill mt-3 align-items-center justify-items-center">
+            <div class="row flex-fill align-items-center justify-items-center">
                 <table class="table table-borderless text-center" >
-<!--                    style="line-height: 2.5"-->
                     <thead>
                         <tr>
                             <th colspan="3">управление</th>
@@ -23,7 +22,6 @@
                         <td>
                             <button id="id_btn_up" type="button" class="btn btn-primary" onclick="Move('up')">
                                 <i class="fas fa-angle-up"></i></button>
-<!--                            <button type="button" class="btn btn-primary">&#11014;</button>-->
                         </td>
                         <td>
                         </td>
@@ -53,18 +51,18 @@
                 </table>
             </div>
             <div class="text-center mb-5">
-                <button class="btn btn-primary" onClick="window.location.reload();">Обновить</button>
+                <button id="id_btn_reload" class="btn btn-primary" onClick="window.location.reload();">Обновить</button>
             </div>
             <div class="text-center">
-                <input id="btn_index" type="button" class="btn btn-primary" value="На главную"
+                <input id="id_btn_index" type="button" class="btn btn-primary" value="На главную"
                        onClick='location.href="/index"'>
             </div>
             <div class="text-center mt-3 mb-3">
-                    <input id="btn_new" type="button" class="btn btn-primary" value="Новая игра"
+                    <input id="id_btn_new" type="button" class="btn btn-primary" value="Новая игра"
                            onClick='location.href="/new"'>
             </div>
         </div>
-        <div class="col-auto align-self-center justify-self-center">
+        <div id="id_game_div" tabindex="0" class="col-auto align-self-center justify-self-center">
             <table id="id_game_table" class="table content-table">
                 <thead></thead>
                 <tbody></tbody>
@@ -73,7 +71,7 @@
         <div class="col grow-fill"></div>
     </div>
 </div>
-<!-- Модальное окно Ошибки-->
+<!-- Модальное окно: Ошибка-->
 <div class="modal fade" id="id_modal_error" tabindex="-1" aria-labelledby="exampleModalLabelError" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -91,7 +89,7 @@
         </div>
     </div>
 </div>
-<!-- Модальное окно Информация-->
+<!-- Модальное окно: Информация-->
 <div class="modal fade" id="id_modal_info" tabindex="-1" aria-labelledby="exampleModalLabelEnd" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">

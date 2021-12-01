@@ -28,6 +28,15 @@ app.logger.setLevel(gunicorn_logger.level)
 the_game = Game()
 
 
+def ping_heroku():
+    """Пинаем хостинг для ускорения генерации"""
+    url = "http://labyrinths.herokuapp.com/"
+    try:
+        _ = requests.get(url)
+    except Exception:
+        pass
+
+
 @app.route('/favicon.ico')
 def favicon():
     return app.send_static_file('favicon.ico')
@@ -268,5 +277,7 @@ def status():
 
 
 if __name__ == '__main__':
+    ping_heroku()  # )
+
     app.run(host='0.0.0.0', port=PORT, debug=True)
     # app.run(host='0.0.0.0', port=PORT, debug=False)

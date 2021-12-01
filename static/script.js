@@ -12,20 +12,23 @@ function init() {
 
 function checkArrow(e) {
     e = e || window.event;
-    if (e.keyCode == '38') {
-        Move('up')
-    }
-    else if (e.keyCode == '40') {
-        Move('down')
-    }
-    else if (e.keyCode == '37') {
-        Move('left')
-    }
-    else if (e.keyCode == '39') {
-        Move('right')
-    }
-    else if (e.keyCode == '32') {
-        Move('sleep')
+    if (document.getElementById('id_game_div') == document.activeElement)
+    {
+        if (e.keyCode == '38') {
+            Move('up')
+        }
+        else if (e.keyCode == '40') {
+            Move('down')
+        }
+        else if (e.keyCode == '37') {
+            Move('left')
+        }
+        else if (e.keyCode == '39') {
+            Move('right')
+        }
+        else if (e.keyCode == '32') {
+            Move('sleep')
+        }
     }
 }
 function get_json(url, json=null, callback=null, callback_onerror=null) {
