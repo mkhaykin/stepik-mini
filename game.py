@@ -452,6 +452,7 @@ class Game:
 
         session = self._sessions[session_id]
         session.next_move(action, direction)
+        return {'status': 'ok'}
 
     def get_game(self, session_id):
         if session_id is None or session_id not in self._sessions:

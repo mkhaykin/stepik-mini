@@ -120,9 +120,12 @@ function Move(direct){
 }
 
 function move_onload(status, json) {
-    // проверка ошибок
-    render_field();
-    flgWaitForMove = false;
+    const data = JSON.parse(json);
+
+    if (data && data['status'] === 'ok') {
+        render_field();
+        flgWaitForMove = false;
+    }
 }
 
 function move_onerror(status, json) {
