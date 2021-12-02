@@ -17,9 +17,11 @@ function checkArrow(e) {
     {
         if (e.keyCode == '38') {
             Move('up')
+            event.preventDefault()
         }
         else if (e.keyCode == '40') {
             Move('down')
+            event.preventDefault()
         }
         else if (e.keyCode == '37') {
             Move('left')
