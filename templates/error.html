@@ -1,6 +1,23 @@
 {% extends "layout.html" %}
 {% block content %}
-<!--TODO написать нормальную обработку ошибок-->
-<p>print ERROR:</p>
-<p>{{exception}}</p>
+<div class="container align-items-center justify-items-center">
+    <div class="row mt-5">
+        <div class="col-1"></div>
+        <div class="col border bg-white shadow-sm">
+            <p><b>При работе произошла ошибка.</b></p><br>
+            <p><b>Описание:</b><pre>{{exception}}</pre></p>
+            {% if message %}
+            <p><b>Сообщение:</b><br><pre>{{message}}</pre></p>
+            {% endif %}
+        </div>
+        <div class="col-1"></div>
+    </div>
+    <div class="form-row row justify-content-center mt-3 mb-3">
+        <div class="col-1"></div>
+        <div class="col">
+            <input id="id_btn_main" type="button" class="btn btn-primary" value="На главную" onClick='location.href="/index"'>
+        </div>
+        <div class="col-1"></div>
+    </div>
+</div>
 {% endblock content %}

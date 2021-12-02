@@ -4,10 +4,12 @@
     <div class="row align-items-center justify-items-center mt-5">
         <div class="col-1"></div>
         <div class="col border bg-white shadow-sm ">
+            {% if error %}
             <details>
                 <summary><b>При загрузке лабиринта с внешнего ресурса произошла ошибка.</b></summary>
                 <pre>{{ error }}</pre>
             </details>
+            {% endif %}
             <br>
             <p>Для продолжения игры выберите любой из ранее сохраненных лабиринтов или повторите попытку позже.</p>
             <form action="" method="post" novalidate>
@@ -41,8 +43,6 @@
                 </div>
                 {% endif%}
             </form>
-
-
         </div>
         <div class="col-1"></div>
     </div>
