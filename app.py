@@ -45,12 +45,6 @@ def favicon():
 @app.route('/index', methods=['GET'])
 @app.route('/index.html', methods=['GET'])
 def index():
-    # app.logger.debug('This is a DEBUG log record.')
-    # app.logger.info('This is an INFO log record.')
-    # app.logger.warning('This is a WARNING log record.')
-    # app.logger.error('This is an ERROR log record.')
-    # app.logger.critical('This is a CRITICAL log record.')
-
     """Главная страница"""
     session_id = request.cookies.get(COOKIE)
     try:
@@ -149,7 +143,7 @@ def load(error=None):
             app.logger.error(f'An unhandled exception:\n\tclass "{e.__class__.__name__}"\n\tmessage {str(e)}')
             # перенаправление на страницу с ошибкой
             # используем render_template для сокрытия адреса
-            return render_template('error.html', exception=e, message="Не возможно создать игру из файла для загрузки")
+            return render_template('error.html', exception=e, message="не возможно создать игру из файла для загрузки")
         else:
             return redirect('/game', code=302, Response=None)
 
